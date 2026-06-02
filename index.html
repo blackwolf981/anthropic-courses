@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code 101</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+  <style>
+    /* ── Variables ──────────────────────────────────────────────── */
+    :root {
+      --bg:           #111111;
+      --surface:      #1c1c1c;
+      --border:       rgba(255,255,255,0.07);
+      --border-md:    rgba(255,255,255,0.13);
+      --text:         #F0F0F0;
+      --text-sec:     #A0A0A0;
+      --text-ter:     #606060;
+      --accent:       #FFD166;
+      --accent-bg:    #2b2200;
+      --radius:       10px;
+      --radius-lg:    14px;
+      --header-h:     52px;
+      --bottomnav-h:  60px;
+      --content-max:  720px;
+    }
+
+    /* ── Reset ──────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      font-family: system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+    }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+    a { color: inherit; text-decoration: none; }
+
+    /* ── Header ─────────────────────────────────────────────────── */
+    .header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--header-h);
+      background: var(--surface);
+      border-bottom: 0.5px solid var(--border-md);
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      flex: 1;
+    }
+    .header-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 70%;
+    }
+    .header-pos {
+      font-size: 11px;
+      color: var(--text-ter);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .header-progress {
+      height: 2px;
+      background: var(--border);
+    }
+    .header-progress-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width .3s ease;
+    }
+
+    /* ── Main content ───────────────────────────────────────────── */
+    .main {
+      margin-top: var(--header-h);
+      padding-bottom: calc(var(--bottomnav-h) + env(safe-area-inset-bottom));
+      min-height: calc(100vh - var(--header-h));
+    }
+    .content-wrap {
+      max-width: var(--content-max);
+      margin: 0 auto;
+      padding: 1rem 1rem 2rem;
+    }
+
+    /* ── Bottom nav ─────────────────────────────────────────────── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: calc(var(--bottomnav-h) + env(safe-area-inset-bottom));
+      background: var(--surface);
+      border-top: 0.5px solid var(--border-md);
+      display: flex;
+      align-items: stretch;
+      z-index: 40;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .bn-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      color: var(--text-ter);
+      transition: color .15s;
+      min-height: 44px;
+    }
+    .bn-item i { font-size: 22px; }
+    .bn-label  { font-size: 10px; letter-spacing: .02em; }
+    .bn-item.active { color: var(--accent); }
+    .bn-item:active { color: var(--accent); opacity: .8; }
+
+    /* ── Overlay ────────────────────────────────────────────────── */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.5);
+      z-index: 50;
+    }
+    .overlay.open { display: block; }
+
+    /* ── Drawer / Picker panels ─────────────────────────────────── */
+    .drawer, .picker {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 60;
+      transform: translateY(100%);
+      transition: transform .25s ease;
+      overflow-y: auto;
+      padding-bottom: calc(var(--bottomnav-h) + env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
+    }
+    .drawer.open, .picker.open { transform: translateY(0); }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .875rem 1rem;
+      background: var(--surface);
+      border-bottom: 0.5px solid var(--border-md);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    .panel-title {
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .panel-close {
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      color: var(--text-sec);
+      transition: background .15s;
+    }
+    .panel-close:active { background: var(--border); }
+    .panel-close i { font-size: 18px; }
+
+    /* ── Drawer content ─────────────────────────────────────────── */
+    .drawer-chapter {
+      border-bottom: 0.5px solid var(--border);
+    }
+    .drawer-ch-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      padding: .875rem 1rem;
+      text-align: left;
+      transition: background .15s;
+    }
+    .drawer-ch-btn:active { background: var(--surface); }
+    .drawer-ch-btn.active { background: var(--accent-bg); }
+    .drawer-ch-num {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--text-ter);
+      flex-shrink: 0;
+    }
+    .drawer-ch-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      flex: 1;
+    }
+    .drawer-ch-btn.active .drawer-ch-title { color: var(--accent); }
+    .drawer-ch-arrow { font-size: 14px; color: var(--text-ter); flex-shrink: 0; }
+
+    .drawer-sections { display: none; }
+    .drawer-sections.open { display: block; }
+    .drawer-sec-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .625rem 1rem .625rem 2.5rem;
+      text-align: left;
+      transition: background .15s;
+      border-top: 0.5px solid var(--border);
+    }
+    .drawer-sec-btn:active { background: var(--surface); }
+    .drawer-sec-btn.active { background: var(--accent-bg); }
+    .drawer-sec-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--text-ter);
+      flex-shrink: 0;
+    }
+    .drawer-sec-btn.active .drawer-sec-dot { background: var(--accent); }
+    .drawer-sec-lesson {
+      font-size: 10px;
+      color: var(--text-ter);
+      flex-shrink: 0;
+    }
+    .drawer-sec-title {
+      font-size: 13px;
+      color: var(--text-sec);
+      flex: 1;
+    }
+    .drawer-sec-btn.active .drawer-sec-title { color: var(--accent); }
+
+    /* ── Course picker ──────────────────────────────────────────── */
+    .course-card {
+      margin: .75rem 1rem;
+      background: var(--surface);
+      border: 0.5px solid var(--border-md);
+      border-radius: var(--radius-lg);
+      padding: 1.1rem;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .course-card:active { border-color: var(--accent); }
+    .course-card.active { border: 1.5px solid var(--accent); }
+    .course-card-title { font-size: 15px; font-weight: 700; margin-bottom: .25rem; }
+    .course-card-sub   { font-size: 13px; color: var(--text-sec); }
+
+    /* ── Chapter overview ───────────────────────────────────────── */
+    .ch-overview-header {
+      margin-bottom: 1.25rem;
+    }
+    .ch-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-ter);
+      margin-bottom: .35rem;
+    }
+    .ch-title {
+      font-size: 22px;
+      font-weight: 700;
+      font-family: Georgia, serif;
+      line-height: 1.25;
+      margin-bottom: .75rem;
+    }
+    .ch-objectives {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: .875rem 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .ch-obj-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--text-ter);
+      margin-bottom: .5rem;
+    }
+    .ch-obj-item {
+      display: flex;
+      align-items: flex-start;
+      gap: .5rem;
+      font-size: 13px;
+      color: var(--text-sec);
+      line-height: 1.5;
+      margin-bottom: .35rem;
+    }
+    .ch-obj-item i { font-size: 14px; color: var(--accent); margin-top: 1px; flex-shrink: 0; }
+
+    .ch-sections-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--text-ter);
+      margin-bottom: .6rem;
+    }
+    .lesson-card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: .875rem 1rem;
+      margin-bottom: .625rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      transition: border-color .15s;
+    }
+    .lesson-card:active { border-color: var(--border-md); }
+    .lesson-card-num {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--text-ter);
+      white-space: nowrap;
+    }
+    .lesson-card-info { flex: 1; }
+    .lesson-card-title {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+    .lesson-card-meta {
+      font-size: 11px;
+      color: var(--text-ter);
+      margin-top: .2rem;
+    }
+    .lesson-card-arrow { font-size: 16px; color: var(--text-ter); flex-shrink: 0; }
+
+    .ch-reflections {
+      margin-top: 1.25rem;
+    }
+    .refl-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--text-ter);
+      margin-bottom: .5rem;
+    }
+    .refl-item {
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: .4rem;
+    }
+    .refl-q {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .7rem .875rem;
+      text-align: left;
+      font-size: 13px;
+      color: var(--text-sec);
+      gap: .5rem;
+    }
+    .refl-q:active { background: var(--surface); }
+    .refl-q i { font-size: 14px; flex-shrink: 0; transition: transform .2s; }
+    .refl-item.open .refl-q i { transform: rotate(180deg); }
+    .refl-hint {
+      display: none;
+      padding: .625rem .875rem .7rem;
+      font-size: 13px;
+      color: var(--text-ter);
+      border-top: 0.5px solid var(--border);
+    }
+    .refl-item.open .refl-hint { display: block; }
+
+    /* ── Lesson view ────────────────────────────────────────────── */
+    .lesson-title-wrap {
+      margin-bottom: 1rem;
+    }
+    .lesson-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--text-ter);
+      margin-bottom: .3rem;
+    }
+    .lesson-title {
+      font-size: 20px;
+      font-weight: 700;
+      font-family: Georgia, serif;
+      line-height: 1.25;
+    }
+    .lesson-subtitle {
+      font-size: 14px;
+      color: var(--text-sec);
+      margin-top: .25rem;
+    }
+
+    /* ── Notes ──────────────────────────────────────────────────── */
+    .note-desc {
+      font-size: 14px;
+      color: var(--text-sec);
+      line-height: 1.65;
+      margin-bottom: .75rem;
+    }
+    .note-tip {
+      display: flex;
+      align-items: flex-start;
+      gap: .5rem;
+      background: rgba(125,211,252,0.08);
+      border-left: 2px solid #38BDF8;
+      padding: 10px 13px;
+      font-size: 13px;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      color: #7DD3FC;
+      margin-bottom: .75rem;
+      line-height: 1.5;
+    }
+    .note-tip i { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .note-warning {
+      display: flex;
+      align-items: flex-start;
+      gap: .5rem;
+      background: rgba(251,146,60,0.08);
+      border-left: 2px solid #FB923C;
+      padding: 10px 13px;
+      font-size: 13px;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      color: #FB923C;
+      margin-bottom: .75rem;
+      line-height: 1.5;
+    }
+    .note-warning i { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .note-subsection {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--text-ter);
+      padding-top: 1rem;
+      margin: .5rem 0 .75rem;
+      border-top: 0.5px solid var(--border);
+    }
+    .note-youtube {
+      position: relative;
+      width: 100%;
+      padding-bottom: 56.25%;
+      height: 0;
+      margin: .75rem 0;
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .note-youtube iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+    .note-image { margin: .75rem 0; }
+    .note-image img {
+      width: 100%;
+      height: auto;
+      border-radius: var(--radius);
+      border: 0.5px solid var(--border);
+      display: block;
+    }
+    .note-image figcaption {
+      font-size: 11px;
+      color: var(--text-ter);
+      margin-top: .4rem;
+      text-align: center;
+    }
+
+    /* ── Feature cards ──────────────────────────────────────────── */
+    .feature-section-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--text-ter);
+      margin: .5rem 0 .6rem;
+    }
+    .feature-card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: .875rem 1rem;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .feature-card:active  { border-color: var(--border-md); }
+    .feature-card.selected { border: 1.5px solid var(--accent); }
+    .feature-card.selected .feature-icon { color: var(--accent); }
+
+    .feature-name {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      margin-bottom: .4rem;
+    }
+    .feature-icon { font-size: 18px; color: var(--text-sec); }
+    .feature-name-text {
+      font-size: 14px;
+      font-weight: 600;
+      flex: 1;
+    }
+    .feature-badge {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+    .badge-when    { background: rgba(134,239,172,0.12); color: #86EFAC; }
+    .badge-caution { background: rgba(251,146,60,0.12);  color: #FB923C; }
+    .badge-rare    { background: rgba(255,255,255,0.07); color: #A0A0A0; }
+
+    .feature-short {
+      font-size: 13px;
+      color: var(--text-sec);
+      line-height: 1.5;
+    }
+
+    /* ── Detail panel ───────────────────────────────────────────── */
+    .detail-panel {
+      background: var(--surface);
+      border: 1.5px solid var(--accent);
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.1rem;
+      margin-bottom: 1rem;
+    }
+    .detail-panel-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: .75rem;
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .detail-cell {
+      padding: .625rem .875rem;
+      background: var(--bg);
+      border-radius: var(--radius);
+    }
+    .detail-cell-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--text-ter);
+      margin-bottom: 4px;
+    }
+    .detail-cell-val {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── Lesson quiz trigger ─────────────────────────────────────── */
+    .lesson-quiz-btn {
+      width: 100%;
+      margin-top: 1.5rem;
+      padding: .875rem;
+      background: var(--accent-bg);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius-lg);
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      transition: background .15s;
+    }
+    .lesson-quiz-btn:active { background: rgba(255,209,102,0.15); }
+    .lesson-quiz-btn i { font-size: 18px; }
+
+    /* ── Quiz panel ─────────────────────────────────────────────── */
+    .quiz-panel {
+      padding: 0;
+    }
+    .quiz-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .quiz-counter {
+      font-size: 12px;
+      color: var(--text-ter);
+    }
+    .quiz-exit-btn {
+      font-size: 12px;
+      color: var(--text-ter);
+      padding: .3rem .6rem;
+      border: 0.5px solid var(--border-md);
+      border-radius: var(--radius);
+    }
+    .quiz-exit-btn:active { background: var(--surface); }
+    .quiz-bar-wrap {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+    .quiz-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: width .3s ease;
+    }
+    .quiz-q {
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.5;
+      margin-bottom: 1.25rem;
+    }
+    .quiz-opts {
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+      margin-bottom: 1rem;
+    }
+    .quiz-opt {
+      width: 100%;
+      text-align: left;
+      padding: .75rem 1rem;
+      background: var(--surface);
+      border: 0.5px solid var(--border-md);
+      border-radius: var(--radius);
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.4;
+      transition: border-color .15s, background .15s;
+      cursor: pointer;
+    }
+    .quiz-opt:active:not(:disabled) { background: var(--accent-bg); border-color: var(--accent); }
+    .quiz-opt:disabled { cursor: default; }
+    .quiz-opt.correct { background: rgba(134,239,172,0.12); border-color: #86EFAC; color: #86EFAC; }
+    .quiz-opt.wrong   { background: rgba(251,113,133,0.12); border-color: #FB7185; color: #FB7185; }
+    .quiz-explanation {
+      font-size: 13px;
+      color: var(--text-sec);
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: .75rem 1rem;
+      line-height: 1.6;
+      margin-bottom: .75rem;
+      border-left: 2px solid var(--accent);
+    }
+    .quiz-next-btn {
+      width: 100%;
+      padding: .875rem;
+      background: var(--accent);
+      color: #111;
+      border-radius: var(--radius-lg);
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: .5rem;
+      transition: opacity .15s;
+    }
+    .quiz-next-btn:active { opacity: .85; }
+    .quiz-score-wrap {
+      text-align: center;
+      padding: 2rem 0 1rem;
+    }
+    .quiz-score-circle {
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      border: 4px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1rem;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .quiz-score-count {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: .25rem;
+    }
+    .quiz-score-label {
+      font-size: 14px;
+      color: var(--text-sec);
+      margin-bottom: 1.5rem;
+    }
+    .quiz-score-actions {
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+    }
+    .btn-primary {
+      width: 100%;
+      padding: .875rem;
+      background: var(--accent);
+      color: #111;
+      border-radius: var(--radius-lg);
+      font-size: 14px;
+      font-weight: 700;
+      transition: opacity .15s;
+    }
+    .btn-primary:active { opacity: .85; }
+    .btn-ghost {
+      width: 100%;
+      padding: .875rem;
+      background: var(--surface);
+      color: var(--text-sec);
+      border-radius: var(--radius-lg);
+      font-size: 14px;
+      border: 0.5px solid var(--border-md);
+      transition: background .15s;
+    }
+    .btn-ghost:active { background: var(--border); }
+
+    /* ── Desktop ────────────────────────────────────────────────── */
+    @media (min-width: 720px) {
+      .detail-grid { grid-template-columns: 1fr 1fr; }
+      .lesson-card { padding: 1rem 1.1rem; }
+    }
+    @media (min-width: 900px) {
+      .content-wrap { padding: 1.5rem 2rem 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header" id="header">
+    <div class="header-inner">
+      <div class="header-title" id="header-title">Claude Code 101</div>
+      <div class="header-pos" id="header-pos"></div>
+    </div>
+    <div class="header-progress">
+      <div class="header-progress-fill" id="header-progress-fill" style="width:0%"></div>
+    </div>
+  </header>
+
+  <main class="main" id="app"></main>
+
+  <nav class="bottom-nav">
+    <button class="bn-item" id="bn-kurzi" onclick="openPicker()">
+      <i class="ti ti-stack-2"></i>
+      <span class="bn-label">Kurzi</span>
+    </button>
+    <button class="bn-item" id="bn-vsebina" onclick="openDrawer()">
+      <i class="ti ti-list-details"></i>
+      <span class="bn-label">Vsebina</span>
+    </button>
+    <button class="bn-item" id="bn-kviz" onclick="startQuiz('chapter', currentChapterId)">
+      <i class="ti ti-circle-check"></i>
+      <span class="bn-label">Kviz</span>
+    </button>
+  </nav>
+
+  <div class="overlay" id="overlay" onclick="closeAll()"></div>
+
+  <div class="drawer" id="drawer">
+    <div class="panel-header">
+      <span class="panel-title">Vsebina</span>
+      <button class="panel-close" onclick="closeDrawer()"><i class="ti ti-x"></i></button>
+    </div>
+    <div id="drawer-body"></div>
+  </div>
+
+  <div class="picker" id="picker">
+    <div class="panel-header">
+      <span class="panel-title">Kurzi</span>
+      <button class="panel-close" onclick="closePicker()"><i class="ti ti-x"></i></button>
+    </div>
+    <div id="picker-body"></div>
+  </div>
+
+<script>
+const COURSES = [{"id":1,"slug":"cc101","title":"Claude Code 101","subtitle":"Interaktivni ucni vodic","chapters":[{"id":1,"title":"What is Claude Code?","objectives":["Razumeti, kaj je Claude Code in kako se razlikuje od Claude.ai","Spoznati koncept AI agenta — zakaj je to ključna razlika","Prepoznati glavne zmožnosti Claude Code v praksi","Razumeti tri ključne koncepte za učinkovito uporabo"],"reflections":["V čem se Claude Code razlikuje od orodij, ki jih že poznaš?|Claude Code je agent — ne samo odgovarja, ampak dela. Ima neposreden dostop do tvojih datotek in terminala, brez copy/paste.","Kdaj bi raje ostal v nadzoru nad vsako akcijo Claude Code?|Ko delaš na kritičnem sistemu, ko nisi prepričan v navodila, ali ko se učiš novega projekta — Permission Model je tu tvoj zaveznik.","Kaj bi naredil, če bi Claude Code med zanko predlagal akcijo, ki se ti zdi tvegana?|Plan Mode je za to. Prekini zanko, aktiviraj Plan Mode — Claude Code bo prebral vse in ti pokazal točen načrt, preden karkoli naredi.","Kdaj bi izbral Plan Mode namesto Default Mode?|Plan Mode je za večje, tvegane naloge — ko ne veš točno, kaj bo Claude Code naredil. Default Mode je za vsakodnevno delo, korak za korakom."],"sections":[{"id":1,"lesson":"Lekcija 1","title":"What is Claude Code?","features":[{"id":1,"section_id":1,"name":"AI Agent","icon":"ti-robot","badge_type":"when","badge_text":"Ključni koncept","short_desc":"Claude Code ni chatbot — je agent, ki sprejema odločitve in izvaja akcije","what_it_does":"Deluje kot LLM v zanki — sprejema odločitve, izvaja akcije, preverja rezultate in nadaljuje. Ni samo chatbot, ki odgovarja — je agent, ki dela.","when_to_use":"Ko razumeš razliko med chatbotom in agentom — to je osnova za vse ostalo v tečaju.","when_not":"Agent ne pomeni nekontroliran. Claude Code vedno vpraša za dovoljenje pred vsako akcijo.","why_it_matters":"Razlika med chatbotom in agentom je razlika med 'svetovalcem' in 'izvajalcem'. Claude Code dela, ne samo svetuje.","sort_order":1},{"id":2,"section_id":1,"name":"Dostop do datotek","icon":"ti-files","badge_type":"when","badge_text":"Neposreden dostop","short_desc":"Bere in ureja datoteke po celotnem projektu — brez copy/paste","what_it_does":"Ima neposreden dostop do tvojih datotek in celotne kode. Lahko bere, piše, preoblikuje in posodablja katerokoli datoteko v projektu.","when_to_use":"Kadar imaš nalogo, ki vključuje več datotek hkrati — Claude Code sam najde vse relevantne dele.","when_not":"Ne za enkratna vprašanja, ki ne zahtevajo dostopa do datotek — za to je Claude.ai primernejši.","why_it_matters":"Konec copy/paste maratona. Claude Code vidi in ureja tvoj projekt kot celoto, ne samo fragmentov, ki jih prilepiš v chat.","sort_order":2},{"id":3,"section_id":1,"name":"Terminal ukazi","icon":"ti-terminal-2","badge_type":"when","badge_text":"Izvaja akcije","short_desc":"Zažene skripte, testira, instaliira pakete — neposredno v tvojem sistemu","what_it_does":"Izvaja ukaze v terminalu — build skripte, teste, namestitev paketov. Vidi rezultate in se na podlagi njih odloča, kaj narediti naprej.","when_to_use":"Ko imaš nalogo, ki zahteva zagon kode, testiranje ali namestitev orodij.","when_not":"Vedno preveri ukaz preden ga potrdiš — nekateri ukazi imajo stranske učinke na sistemu, ki jih je težko razveljaviti.","why_it_matters":"Claude Code ne samo piše kodo — jo tudi zažene in preveri, ali deluje. To je razlika med predlogom in rešitvijo.","sort_order":3},{"id":4,"section_id":1,"name":"Spletno iskanje","icon":"ti-world-search","badge_type":"when","badge_text":"Vgrajeno","short_desc":"Ko potrebuje dokumentacijo ali API reference, poišče sam","what_it_does":"Kadar naleti na neznano knjižnico, API ali napako, samostojno poišče aktualne informacije na spletu.","when_to_use":"Koristno pri delu z novejšimi knjižnicami ali hitro razvijajočimi se API-ji, kjer so informacije zastarele.","when_not":"Iskanje po spletu upočasni odgovor — ni vedno potrebno za dobro znane tehnologije.","why_it_matters":"Claude Code ni omejen na svoje znanje iz treninga. Doseže zunanji svet, kadar je to potrebno.","sort_order":4},{"id":5,"section_id":1,"name":"Context Window","icon":"ti-brain","badge_type":"caution","badge_text":"Razumej mejo","short_desc":"Delovna memoria Claude Code — drži ogromno, a ne vsega hkrati","what_it_does":"Context window je Claude-ova delovna memoria — koliko informacij lahko hkrati vidi in obdeluje. Za velike projekte to pomeni, da ne naloži vsega naenkrat, ampak strateško navigira.","when_to_use":"Razumevanje context window pomaga pri pisanju boljših navodil — bolj fokusiranih, z manj odvečnega šuma.","when_not":"Ne skrbi preveč — Claude Code sam pametno navigira po bazi kode in naloži le relevantne dele.","why_it_matters":"To je agentic del — Claude Code ne bere celotne kode po vrsti, ampak strateško išče odgovore znotraj nje. Fokusirana navodila = boljši rezultati.","sort_order":5},{"id":6,"section_id":1,"name":"Permission Model","icon":"ti-lock-check","badge_type":"when","badge_text":"Vedno v nadzoru","short_desc":"Pred vsako akcijo vpraša za dovoljenje — ti odločaš, koliko svobode ima","what_it_does":"Pred vsakim ukazom ali spremembo datoteke Claude Code pokaže, kaj namerava narediti, in počaka na tvoje dovoljenje. Ti si vedno zadnja instanca.","when_to_use":"Privzeto vedenje — priporočeno za začetnike in za kritične sisteme. Vedno veš, kaj se dogaja.","when_not":"Za rutinska opravila ga lahko nastaviš na bolj avtonomno delovanje — a le ko zaupate drug drugemu.","why_it_matters":"Ti si vedno v nadzoru. Claude Code je orodje, ne avtopilot. Dovoljenja so varovalo, ne ovira.","sort_order":6},{"id":7,"section_id":1,"name":"Napake so možne","icon":"ti-alert-triangle","badge_type":"caution","badge_text":"Ostani v zanki","short_desc":"Claude Code ni popoln — napačno razume namen, over-engineera rešitve","what_it_does":"Kot vsako AI orodje, Claude Code ni nezmotljiv. Napačno razume tvojo nalogo, uvede hrošče, ali predlaga preveč kompleksno rešitev.","when_to_use":"Vedno ostani v zanki — pregleduj spremembe, preverjaj rezultate, sprašuj za razlago.","when_not":"Ne prepusti dolgih, kompleksnih nalog brez vmesnega pregleda — verjetnost napake raste z dolžino naloge.","why_it_matters":"Razumevanje omejitev ti da realna pričakovanja. Claude Code je zelo zmogljiv — a samo v rokah pozornega uporabnika.","sort_order":7}],"notes":[{"id":1,"section_id":1,"note_type":"youtube","content":"fl1DSmwQKKY","sort_order":-3},{"id":2,"section_id":1,"note_type":"desc","content":"Claude Code je agentic coding tool — razume tvojo kodo, ureja datoteke, zažene ukaze in se poveže z zunanjimi orodji. Ni samo chatbot: je AI agent, ki dela v tvojem sistemu.","sort_order":-2},{"id":3,"section_id":1,"note_type":"tip","content":"Dostopen povsod: terminal, Visual Studio Code, Claude Desktop app, JetBrains IDEs, in splet.","sort_order":-1},{"id":4,"section_id":1,"note_type":"subsection-header","content":"Tri koncepti za učinkovito uporabo","sort_order":10},{"id":5,"section_id":1,"note_type":"warning","content":"Claude Code ni popoln. Napačno razume namen, uvede hrošče, ali over-engineera rešitve. Ostani v zanki in pregleduj vsako večjo spremembo.","sort_order":11}],"questions":[{"id":1,"q":"Kaj je glavna razlika med Claude Code in navadnim chatbotom?","options":["Claude Code je hitrejši","Claude Code je agent, ki sprejema odločitve in izvaja akcije","Claude Code ima lepši vmesnik","Claude Code je cenejši"],"correct":1,"explanation":"Claude Code ni chatbot — je agent, ki deluje kot LLM v zanki: sprejema odločitve, izvaja akcije, preverja rezultate."},{"id":2,"q":"Kako Claude Code dostopa do tvojih datotek?","options":["Prek copy/paste v chat","Z neposrednim dostopom do datotek in celotne kode","Prek e-pošte","Sploh ne more dostopati"],"correct":1,"explanation":"Claude Code ima neposreden dostop — bere, piše in posodablja datoteke po celotnem projektu, brez copy/paste."},{"id":3,"q":"Kdaj Claude Code samostojno poišče informacije na spletu?","options":["Nikoli","Vedno pred vsakim odgovorom","Ko naleti na neznano knjižnico, API ali napako","Samo če mu daš URL"],"correct":2,"explanation":"Spletno iskanje uporabi, ko naleti na nekaj neznanega — npr. novejšo knjižnico ali hitro razvijajoč se API."},{"id":4,"q":"Kaj je context window?","options":["Okno za nastavitve","Claude-ova delovna memoria — koliko informacij hkrati vidi in obdeluje","Seznam vseh datotek v projektu","Terminal za ukaze"],"correct":1,"explanation":"Context window je delovna memoria — koliko informacij Claude Code hkrati vidi. Zato strateško navigira po veliki bazi kode."},{"id":5,"q":"Kaj naredi Permission Model?","options":["Avtomatsko izvede vse akcije","Pred vsako akcijo vpraša za dovoljenje","Onemogoči Claude Code","Shrani tvoja gesla"],"correct":1,"explanation":"Pred vsakim ukazom ali spremembo Claude Code pokaže, kaj namerava, in počaka na tvoje dovoljenje. Ti si zadnja instanca."},{"id":6,"q":"Ali je Claude Code nezmotljiv?","options":["Da, vedno dela brez napak","Ne — napačno razume namen, uvede hrošče ali over-engineera","Samo na velikih projektih dela napake","Samo brez interneta"],"correct":1,"explanation":"Kot vsako AI orodje ni popoln. Zato ostani v zanki in pregleduj vsako večjo spremembo."},{"id":7,"q":"Kaj pomeni, da je Claude Code 'agent'?","options":["Da te zastopa pri pogajanjih","Da deluje v zanki: odloča, izvaja, preverja in nadaljuje","Da je vohunsko orodje","Da naredi samo en ukaz naenkrat"],"correct":1,"explanation":"Agent = LLM v zanki, ki sprejema odločitve in izvaja akcije — ne samo odgovarja kot chatbot."},{"id":8,"q":"Kje vse je Claude Code dostopen?","options":["Samo v terminalu","Samo v brskalniku","Terminal, VS Code, Claude Desktop, JetBrains IDE-ji in splet","Samo na Linuxu"],"correct":2,"explanation":"Dostopen je povsod: terminal, Visual Studio Code, Claude Desktop app, JetBrains IDE-ji in splet."}]},{"id":2,"lesson":"Lekcija 2","title":"How Claude Code Works: Agentna zanka in orodja","features":[{"id":8,"section_id":2,"name":"Agentna zanka","icon":"ti-refresh","badge_type":"when","badge_text":"Jedro sistema","short_desc":"5-koračni cikel: prompt → kontekst → akcija → preveritev → konec ali ponovi","what_it_does":"Ko vneseš prompt, Claude Code zbere kontekst, ki ga potrebuje, nato izvede akcijo (uredi datoteko, zažene ukaz), preveri rezultat in odloči: ali je naloga opravljena ali je treba ponoviti zanko.","when_to_use":"Razumevanje zanke ti pomaga bolje strukturirati naloge — daljše razdeli na manjše, da imaš vmesni pregled nad rezultati.","when_not":"Ne predpostavljaj, da se vse zgodi v eni zanki. Več iteracij je normalno, ne napaka.","why_it_matters":"Zanka je razlog, zakaj Claude Code rešuje prave probleme — vsaka iteracija ga pripelje bližje tvojemu cilju.","sort_order":1},{"id":9,"section_id":2,"name":"Context Window","icon":"ti-brain","badge_type":"caution","badge_text":"Pozoren na mejo","short_desc":"Delovna memoria — koliko pogovora, kode in rezultatov Claude hkrati vidi","what_it_does":"Context window določa, koliko informacij Claude Code hkrati 'drži v glavi' — pogovor, vsebina datotek, rezultati ukazov. Ko se napolni, se aktivira compaction.","when_to_use":"Dolge seje ali velike datoteke? Začni nov pogovor ali manjšo nalogo, da ohraniš fokus in kakovost rezultatov.","when_not":"Ne dodajaj nepotrebnih datotek v kontekst — več šuma pomeni manj fokusa. Daj Claude Code samo tisto, kar res potrebuje za nalogo.","why_it_matters":"Fokusirana navodila delujejo bolje od razpotegnjenih pogovorov. Manj šuma = boljši rezultati.","sort_order":2},{"id":10,"section_id":2,"name":"Compaction","icon":"ti-arrows-minimize","badge_type":"when","badge_text":"Samodejno","short_desc":"Ko se context napolni, Claude Code sam stisne in povzame — brez tvoje intervencije","what_it_does":"Ko context window doseže mejo, Claude Code samodejno določi, kaj je mogoče odstraniti ali povzeti — in tako sprosti prostor brez izgube ključnih informacij.","when_to_use":"Compaction se aktivira samodejno — ti tega ne upravljaš. Zavedaj se ga, ko opaziš, da Claude Code 'pozablja' zgodnejše dele pogovora.","when_not":"Za kritične dolge naloge razdeli seje. Compaction je pameten, ni pa nezmotljiv — del konteksta se vedno izgubi.","why_it_matters":"Omogoča dolge delovne seje brez ročnega upravljanja. Claude Code sam skrbi za svojo delovno memorijo.","sort_order":3},{"id":11,"section_id":2,"name":"Tools","icon":"ti-tools","badge_type":"when","badge_text":"Osnova agenta","short_desc":"Orodja odločijo kdaj izvršiti kodo — branje datotek, spletno iskanje, terminal","what_it_does":"Tools so razlog, zakaj Claude Code ni le chatbot. Namesto da samo vrne besedilo, Claude Code sam odloči, kdaj prebrati datoteko, poiskati na spletu ali zagnati ukaz — in to vgradi v zanko.","when_to_use":"Bolj ko razumeš, katera orodja so na voljo (branje datotek, terminal, splet), bolje znaš oblikovati naloge.","when_not":"Orodij ne kličeš ročno — Claude Code jih izbere sam. Fokusiraj se na nalogo, ne na to, katero orodje bo uporabil.","why_it_matters":"Orodja so ločnica med chatbotom, ki svetuje, in agentom, ki dela v resničnem svetu. Vsako orodje je akcija — ne samo besedilo.","sort_order":4},{"id":12,"section_id":2,"name":"Default Mode","icon":"ti-lock","badge_type":"when","badge_text":"Priporočeno","short_desc":"Claude vpraša za dovoljenje pred vsako datoteko ali ukazom — ti vedno v nadzoru","what_it_does":"V Default Mode Claude Code pokaže vsako nameravano akcijo — urejanje datoteke, zagon ukaza — in počaka na tvoje dovoljenje. Nič se ne zgodi brez tvojega 'yes'.","when_to_use":"Vedno, kadar delaš na novem projektu, se učiš, ali delaš na kritičnih sistemih. Default Mode je tvoj varnostni pas.","when_not":"Za rutinska, dobro znana opravila na testnem okolju je morda počasen — takrat premisli o Auto-accept Mode, a z razumevanjem tveganj.","why_it_matters":"Nadzor je temelj zaupanja. Default Mode ti da čas, da razumeš, kaj Claude Code dela in zakaj. To je najhitrejši način učenja.","sort_order":5},{"id":13,"section_id":2,"name":"Auto-accept Mode","icon":"ti-bolt","badge_type":"caution","badge_text":"Pazi","short_desc":"Datoteke ureja brez vprašanja — ukazi še vedno čakajo na potrditev","what_it_does":"V Auto-accept Mode Claude Code ureja datoteke samodejno, brez vsakokratnega dovoljenja. Terminal ukazi (npm install, git push…) pa še vedno zahtevajo potrditev.","when_to_use":"Za hitrejše iteracije na testnem projektu, ko že zaupate drug drugemu in veš, kaj Claude Code počne.","when_not":"Ne na produkcijskih sistemih, ne za kodo, ki je nisi pregledal, ne za operacije, ki jih je težko razveljaviti. Hitreje ≠ varneje.","why_it_matters":"Produktivnostno orodje — a odgovornost za napake se prenese nate. Veš, kaj delaš? Potem pospešuj.","sort_order":6},{"id":14,"section_id":2,"name":"Plan Mode","icon":"ti-clipboard-list","badge_type":"when","badge_text":"Premisli najprej","short_desc":"Claude Code samo bere in planira — nobene spremembe, dokler ne rečeš 'go'","what_it_does":"V Plan Mode Claude Code uporablja samo bralna orodja — prebere kodo, datoteke, dokumentacijo — in sestavi natančen načrt, kaj bo naredil in v katerem vrstnem redu. Nobene spremembe se ne zgodijo. Ko načrt odobritev, šele takrat preide v izvedbo. Aktiviraš ga z besedo 'plan' v promptu ali s Shift+Tab v terminalu.","when_to_use":"Pred vsako večjo ali tvegano spremembo: refaktoring, nove funkcionalnosti, migracije, brisanje datotek. Plan Mode je obvezen varnostni korak za kompleksne naloge, kjer napaka pride drago.","when_not":"Za majhne, enostavne naloge je Plan Mode odvečen korak. Uporabi ga, ko negotovost narašča ali ko sprememb ne moreš zlahka razveljaviti.","why_it_matters":"Najboljše od obeh svetov: hitrost agenta + nadzor človeka. Preden Claude Code karkoli naredi, točno veš, kaj bo naredil in zakaj. Brez presenečenj, brez neprijetnih odkritij po dejstvu.","sort_order":7}],"notes":[{"id":6,"section_id":2,"note_type":"youtube","content":"6bs5b4FltCU","sort_order":-3},{"id":7,"section_id":2,"note_type":"desc","content":"Claude Code ne odgovarja — deluje v zanki. Razumevanje te zanke ti da moč, da ga bolje usmeriš: kdaj mu dati svobodo, kdaj ga ustaviti, kdaj ga vprašati za načrt.","sort_order":-2},{"id":8,"section_id":2,"note_type":"tip","content":"Med agentno zanko lahko kadarkoli dodaš kontekst, prekinješ izvajanje ali preusmeriš Claude Code — zanka ni zaklenjena.","sort_order":-1},{"id":9,"section_id":2,"note_type":"subsection-header","content":"Kateri način izbrati?","sort_order":10},{"id":10,"section_id":2,"note_type":"warning","content":"Auto-accept Mode je hitrejši — a napako je težje ujeti, preden se zgodi. Začni z Default Mode, preklopi šele ko dobro razumeš, kaj Claude Code počne.","sort_order":11}],"questions":[{"id":9,"q":"Koliko korakov ima agentna zanka?","options":["3 koraki","5 korakov","7 korakov","10 korakov"],"correct":1,"explanation":"5-koračni cikel: prompt → kontekst → akcija → preveritev → konec ali ponovi."},{"id":10,"q":"Kaj se zgodi, ko se context window napolni?","options":["Claude Code se ustavi","Aktivira se compaction — samodejno stiskanje in povzemanje","Izgubiš vse delo","Računalnik se sesuje"],"correct":1,"explanation":"Ko context doseže mejo, Claude Code samodejno določi, kaj stisniti ali povzeti, da sprosti prostor."},{"id":11,"q":"Ali compaction upravljaš ročno?","options":["Da, vedno ga sprožiš sam","Ne — aktivira se samodejno","Samo v Plan Mode","Samo s posebnim ukazom"],"correct":1,"explanation":"Compaction se aktivira samodejno, ti ga ne upravljaš. Za kritične dolge naloge pa raje razdeli seje."},{"id":12,"q":"Kaj so 'tools' v kontekstu Claude Code?","options":["Fizična orodja","Razlog, da Claude Code izvaja akcije — branje datotek, splet, terminal","Nastavitve videza","Tipkovne bližnjice"],"correct":1,"explanation":"Tools so ločnica med chatbotom in agentom — vsako orodje je akcija v resničnem svetu, ne samo besedilo."},{"id":13,"q":"Kaj naredi Default Mode?","options":["Izvede vse brez vprašanja","Vpraša za dovoljenje pred vsako datoteko ali ukazom","Onemogoči terminal","Samo bere kodo"],"correct":1,"explanation":"V Default Mode Claude Code pokaže vsako akcijo in počaka na tvoje 'yes'. Priporočeno za začetnike in kritične sisteme."},{"id":14,"q":"Česa Auto-accept Mode NE naredi samodejno?","options":["Urejanja datotek","Terminal ukazov (npm install, git push)","Branja kode","Ničesar — vse dela samodejno"],"correct":1,"explanation":"V Auto-accept Mode datoteke ureja samodejno, ampak terminal ukazi še vedno zahtevajo potrditev."},{"id":15,"q":"Kaj počne Claude Code v Plan Mode?","options":["Takoj izvede vse spremembe","Samo bere in sestavi načrt — nobene spremembe dokler ne odobriš","Izbriše nepotrebne datoteke","Se izklopi"],"correct":1,"explanation":"V Plan Mode uporablja samo bralna orodja in sestavi natančen načrt. Šele po odobritvi preide v izvedbo. Aktiviraš s Shift+Tab."},{"id":16,"q":"Kdaj je Plan Mode najbolj smiseln?","options":["Za majhne, enostavne naloge","Pred večjimi ali tveganimi spremembami: refaktoring, migracije, brisanje","Nikoli","Samo za branje dokumentacije"],"correct":1,"explanation":"Plan Mode je obvezen varnostni korak za kompleksne naloge, kjer napaka pride drago."},{"id":17,"q":"Ali je zanka zaklenjena, ko Claude Code dela?","options":["Da, ne moreš poseči vmes","Ne — kadarkoli lahko dodaš kontekst, prekineš ali preusmeriš","Samo v Default Mode lahko posežeš","Samo če ustaviš terminal"],"correct":1,"explanation":"Med agentno zanko lahko kadarkoli dodaš kontekst, prekineš izvajanje ali preusmeriš Claude Code."}]}]},{"id":2,"title":"Your first prompt","objectives":["Vedeti, da Claude Code deluje v terminalu, IDE-jih, Desktop appu in spletu — enako orodje, različna okolja","Razumeti razliko med okolji: katera zahtevajo namestitev, katera ne","Znati izbrati pravo okolje glede na lastni profil in način dela","Razumeti koncept delovnega direktorija — kaj Claude Code vidi in česa ne"],"reflections":["Katero okolje bi izbral za svoje delo? Zakaj?|Desktop je najboljša izbira za ne-developerje — zaženeš ga brez terminala, dela v ozadju, in imaš vizualni vmesnik. Web je odlična alternativa, če delaš na GitHub projektih.","Zakaj Claude Code 'ne vidi' datoteke, ki jo imaš odprto kje drugje?|Claude Code vidi samo mapo, v kateri si ga zagnal, in vse njene podmape. Datoteke zunaj tega direktorija zanjo preprosto ne obstajajo.","Katera metoda namestitve ne podpira samodejnih posodobitev?|Metoda curl — direkten prenos skripte. Za samodejne posodobitve uporabi npm ali brew (macOS).","Zakaj je pri namestitvi važno, kateri račun izbereš?|Claude Code te med namestitvijo vpraša za Pro, Team ali Enterprise. Napačna prijava pomeni napačen model, napačne limite — posebej kritično za organizacije z Enterprise računom."],"sections":[{"id":3,"lesson":"Lekcija 1","title":"Installing Claude Code","features":[{"id":15,"section_id":3,"name":"Terminal","icon":"ti-terminal-2","badge_type":"when","badge_text":"Največja kontrola","short_desc":"Namesti prek npm, brew ali curl — direkten dostop, priporočen za napredne","what_it_does":"V terminalu namestiš Claude Code z enim ukazom: npm install ali brew install za macOS. Obstaja tudi curl metoda, a ta ne podpira samodejnih posodobitev. Na Windowsu uporabiš PowerShell ali winget. Po namestitvi poženete ukaz claude in Claude Code se zažene.","when_to_use":"Ko že delaš v terminalu, ko hočeš najbolj svežo verzijo Claude Code, ali ko potrebuješ polno kontrolo nad namestitvijo in posodobitvami.","when_not":"Ni najboljša izbira za ne-developerje — zahteva Node.js in osnovno poznavanje terminala. Za začetnike je Desktop app boljša pot.","why_it_matters":"Terminal daje največjo svobodo in je vedno prvi, ki dobi nove funkcije. Če veš, kaj delaš — to je tvoje okolje.","sort_order":1},{"id":16,"section_id":3,"name":"Visual Studio Code","icon":"ti-brand-vscode","badge_type":"when","badge_text":"Za VS Code uporabnike","short_desc":"Razširitev v VS Code — Claude Code teče vzporedno z editorjem","what_it_does":"V VS Code odpreš ploščo Extensions, poiščeš 'Claude Code' in namestiš razširitev Anthropic. Po namestitvi restartiraj VS Code, odpri ukazno paleto (Ctrl+Shift+P) in poišči 'Open in New Tab'. Claude logo bo viden v stranski vrstici.","when_to_use":"Ko že delaš v VS Code in hočeš Claude Code neposredno ob svoji kodi — brez preklapljanja med okni.","when_not":"Če ne delaš v VS Code, ni razloga za to pot. Desktop ali Web sta enostavnejša.","why_it_matters":"VS Code razširitev ti da terminalno izkušnjo Claude Code znotraj editorja — Claude Code vidi tvojo kodo, ti pa vidiš Claude Code. Vse na enem mestu.","sort_order":2},{"id":17,"section_id":3,"name":"JetBrains","icon":"ti-device-laptop","badge_type":"when","badge_text":"Za JetBrains IDE-je","short_desc":"Plugin iz JetBrains Marketplace — deluje vzporedno z editorjem","what_it_does":"Namestiš Claude Code plugin iz JetBrains Marketplace, restartiraj IDE. Ob kliku na Claude logo se odpre stranski panel s terminalno izkušnjo — Claude Code dela vzporedno s tvojim editorjem.","when_to_use":"Ko delaš v JetBrains IDE-jih (IntelliJ, PyCharm, WebStorm…) in hočeš Claude Code ob svoji kodi.","when_not":"Samo za JetBrains ekosistem — za VS Code ali terminal uporabi drugo pot.","why_it_matters":"JetBrains IDE-ji so priljubljeni med profesionalnimi razvijalci. Plugin prinaša enako izkušnjo kot VS Code razširitev — Claude Code ob editorju, brez menjave orodij.","sort_order":3},{"id":18,"section_id":3,"name":"Claude Desktop","icon":"ti-device-desktop","badge_type":"when","badge_text":"Brez terminala","short_desc":"Toggle 'Code' v Desktop appu — idealno za ne-developerje","what_it_does":"Po namestitvi in prijavi v Claude Desktop app najdeš toggle 'Code' na vrhu vmesnika. Klikni ga — in Claude Code je aktiven. Omogoča delo v specifični mapi, spreminjanje dovoljenj in celo delo v oblačnem okolju.","when_to_use":"Ko hočeš Claude Code brez terminala in brez nameščanja paketov. Desktop app je najboljša vstopna točka za ne-developerje — vizualen vmesnik, dela v ozadju.","when_not":"Ni za napredne scenarije, kjer rabiš polno kontrolo nad terminalom ali nastavitvami.","why_it_matters":"Desktop odstranjuje tehnično bariero. Ne rabiš vedeti, kaj je npm ali brew — samo klikneš 'Code' in začneš. To je Claude Code za vse, ne samo za razvijalce.","sort_order":4},{"id":19,"section_id":3,"name":"Web","icon":"ti-world","badge_type":"when","badge_text":"Brez namestitve","short_desc":"claude.ai/code ali 'Code' v stranskem meniju — dela v brskalniku","what_it_does":"Na spletu dosežeš Claude Code na claude.ai/code ali s klikom na oznako 'Code' v stranskem meniju Claude.ai. Izkušnja je podobna Desktop appu — brez lokalne namestitve.","when_to_use":"Ko delaš na daljavo, na tujem računalniku, ali ko hočeš Claude Code brez kakršne koli namestitve. Še posebej dobro za delo z GitHub repozitoriji.","when_not":"Manj primerno za dolgotrajne lokalne naloge — brez dostopa do lokalnih datotek, ki niso v repozitoriju.","why_it_matters":"Web verzija pomeni, da Claude Code nimaš nič vezanega na en računalnik. Odpri brskalnik, prijavi se — in si tam, kjer si bil.","sort_order":5},{"id":20,"section_id":3,"name":"Delovni direktorij","icon":"ti-folder-open","badge_type":"when","badge_text":"Meja vidljivosti","short_desc":"Claude Code vidi samo mapo, v kateri ga zaženemo — in vse njene podmape","what_it_does":"Ko zaženete Claude Code (v terminalu, VS Code ali Desktop appu), mu daš dostop do specifičnega direktorija. Vse datoteke v tej mapi in njenih podmapah so vidne. Karkoli zunaj te meje — ne obstaja.","when_to_use":"Vedno, ko Claude Code 'ne najde' datoteke — prvi korak je preveriti, ali je datoteka znotraj delovnega direktorija.","when_not":"Ne dodajaj celotnega diska kot delovni direktorij — Claude Code deluje bolje, ko je kontekst fokusiran na en projekt.","why_it_matters":"To je eden najpomembnejših mentalnih modelov za razumevanje Claude Code. Ni vsevideč — ima mejo, in to mejo si postaviš sam z izbiro direktorija.","sort_order":6},{"id":21,"section_id":3,"name":"Prijava & plan","icon":"ti-user-check","badge_type":"when","badge_text":"Pro, Team ali Enterprise","short_desc":"Med namestitvijo izbereš račun — napačna izbira pomeni napačne nastavitve","what_it_does":"Med prvim zagonom Claude Code te vodi skozi začetne korake: barvna tema, prijava z računom. Izbiraš med Claude Pro, Team, Enterprise računom ali API ključem. Vsaka možnost prinaša drugačen model, drugačne limite in drugačne nastavitve.","when_to_use":"Vsakič, ko namestiš Claude Code — ta korak je obvezen. Za organizacije z Enterprise računom je izbira 'Enterprise' kritična, da dobiš prave nastavitve in varnostne politike.","when_not":"Ne preskoči tega koraka na hitro — napačna prijava pomeni napačen plan in morebitne varnostne težave v poslovnem okolju.","why_it_matters":"Za posameznike je to preprosta odločitev. Za organizacije je ta korak varnostna in upravljavska odločitev — kdo ima dostop, kateri model se uporablja, kateri podatki so zaščiteni.","sort_order":7},{"id":22,"section_id":3,"name":"Kateri izbrati?","icon":"ti-help-circle","badge_type":"rare","badge_text":"Odločitveni vodič","short_desc":"Terminal = kontrola, Desktop = preprostost, Web = mobilnost, IDE = integracija","what_it_does":"Vsako okolje ima svoj profil: Terminal je za napredne, ki hočejo svežo verzijo in polno kontrolo. Desktop je za ne-developerje in tiste, ki hočejo Claude Code delati v ozadju. Web je za mobilne scenarije in GitHub projekte. VS Code in JetBrains sta za razvijalce, ki hočejo vse na enem mestu.","when_to_use":"Ko si prvič pred izbiro — ta kartica ti da okvir za odločitev. Kasneje jo ne rabiš več.","when_not":"Ni nujno, da izbereš samo eno. Mnogi uporabljajo Desktop doma in Web na delu.","why_it_matters":"Ni napačne izbire — je pa prava izbira za tvoj profil. Non-developer → Desktop. Remote worker → Web. Developer → Terminal ali IDE.","sort_order":8}],"notes":[{"id":11,"section_id":3,"note_type":"youtube","content":"0kILa02vKuI","sort_order":-3},{"id":12,"section_id":3,"note_type":"desc","content":"Claude Code je preprosto namestiti — ne glede na to, ali raje delaš v terminalu, v IDE-ju, v Desktop appu ali kar v brskalniku. Enako orodje, pet različnih vrat.","sort_order":-2},{"id":13,"section_id":3,"note_type":"tip","content":"Vsa okolja poganjajo isti Claude Code — razlika je samo v tem, kako komuniciraš z njim. Izberi tisto, ki ti leži.","sort_order":-1},{"id":14,"section_id":3,"note_type":"subsection-header","content":"Kateri izbrati?","sort_order":10},{"id":15,"section_id":3,"note_type":"tip","content":"Desktop je najprimernejša izbira za ne-developerje: ni terminala, ni nameščanja paketov, dela v ozadju. Web je idealen, če delaš na GitHub projektih iz katere koli naprave.","sort_order":11}],"questions":[{"id":18,"q":"Katera metoda namestitve v terminalu NE podpira samodejnih posodobitev?","options":["npm install","brew install","curl metoda","winget"],"correct":2,"explanation":"Curl metoda je direkten prenos skripte — posodobitve moraš narediti ročno. npm in brew to uredita samodejno."},{"id":19,"q":"Kje v VS Code najdeš Claude Code razširitev?","options":["V meniju File","V plošči Extensions","V ukazni paleti","V nastavitvah"],"correct":1,"explanation":"Odpreš ploščo Extensions, poiščeš 'Claude Code' in namestiš razširitev Anthropic."},{"id":20,"q":"Kaj moraš narediti po namestitvi Claude Code razširitve v VS Code?","options":["Nič — takoj deluje","Restartati VS Code","Namestiti Node.js","Ustvariti nov projekt"],"correct":1,"explanation":"Po namestitvi rabiš restartati VS Code, nato odpreti ukazno paleto in poiskati 'Open in New Tab'."},{"id":21,"q":"Kako aktiviraš Claude Code v Claude Desktop appu?","options":["Z ukazom v terminalu","S klikom na toggle 'Code' na vrhu vmesnika","Z namestitvijo razširitve","Z odprtjem novega okna"],"correct":1,"explanation":"V Desktop appu je toggle 'Code' na vrhu — klikni ga in Claude Code je aktiven. Brez terminala."},{"id":22,"q":"Kateri URL uporabiš za Claude Code na spletu?","options":["claude.ai/agent","claude.ai/code","code.anthropic.com","claude.ai/terminal"],"correct":1,"explanation":"Spletna verzija je dostopna na claude.ai/code ali s klikom na 'Code' v stranskem meniju Claude.ai."},{"id":23,"q":"Katero okolje je priporočeno za ne-developerje brez izkušenj s terminalom?","options":["Terminal z npm","JetBrains plugin","Claude Desktop app","VS Code razširitev"],"correct":2,"explanation":"Desktop app ne zahteva terminala ali nameščanja paketov — samo klikneš 'Code' in začneš."},{"id":24,"q":"Katero okolje je najboljše za delo z GitHub repozitoriji na daljavo?","options":["Terminal","VS Code","Claude Desktop","Web (claude.ai/code)"],"correct":3,"explanation":"Web verzija je idealna za GitHub projekte in oddaljeno delo — brez lokalne namestitve."},{"id":25,"q":"Kaj vidi Claude Code, ko ga zaženemo v določenem direktoriju?","options":["Vse datoteke na računalniku","Samo datoteko, ki jo odpremo","Samo mapo in vse njene podmape","Samo datoteke, ki jih eksplicitno pošljemo"],"correct":2,"explanation":"Claude Code vidi samo izbrani direktorij in vse podmape. Karkoli zunaj te meje zanj ne obstaja."},{"id":26,"q":"Zakaj je izbira direktorija pri zagonu Claude Code pomembna?","options":["Samo iz estetičnih razlogov","Ker Claude Code vidi samo ta direktorij — to je njegova meja vidljivosti","Ker vpliva na hitrost","Ker določa barvno temo"],"correct":1,"explanation":"Direktorij = meja vidljivosti. Datoteke zunaj njega Claude Code ne more brati ali urejati."},{"id":27,"q":"Katere možnosti prijave ponudi Claude Code med namestitvijo?","options":["Samo Google račun","Claude Pro, Team, Enterprise ali API ključ","Samo API ključ","Facebook ali Apple račun"],"correct":1,"explanation":"Med prvim zagonom izbiraš med Pro, Team, Enterprise računom ali API ključem — vsaka možnost prinaša drugačne nastavitve."},{"id":28,"q":"Zakaj je za organizacije kritično izbrati Enterprise račun med namestitvijo?","options":["Ker je cenejši","Ker prinaša prave varnostne politike in nastavitve za organizacijo","Ker ima boljši UI","Ker je edini, ki deluje v VS Code"],"correct":1,"explanation":"Napačna prijava pomeni napačen model in napačne varnostne nastavitve — za organizacije je to resna težava."},{"id":29,"q":"Kateri dve okolji ne zahtevata ločene namestitve Claude Code?","options":["Terminal in VS Code","Desktop in JetBrains","Web in Claude Desktop","VS Code in Web"],"correct":2,"explanation":"Web deluje v brskalniku brez namestitve. Desktop app vključuje Claude Code brez ločene namestitve — samo namestiš Claude Desktop in aktiviraš toggle."},{"id":30,"q":"Kje najdeš Claude Code plugin za JetBrains IDE-je?","options":["V VS Code Extensions","V JetBrains Marketplace","Na claude.ai","V GitHub repozitoriju"],"correct":1,"explanation":"JetBrains plugin namestiš iz JetBrains Marketplace — enako kot ostale JetBrains plugine."},{"id":31,"q":"Katero okolje je priporočeno, če hočeš vedno najnovejšo verzijo Claude Code?","options":["Web","Claude Desktop","Terminal","JetBrains"],"correct":2,"explanation":"Terminal je 'cutting edge' — prvi dobi nove funkcije in omogoča polno kontrolo nad verzijo."},{"id":32,"q":"Ali moraš izbrati samo eno okolje za delo s Claude Code?","options":["Da, izbira je dokončna","Ne — mnogi kombinirajo npr. Desktop doma in Web na delu","Da, ker vsako okolje shranjuje drugačne nastavitve","Ne, ampak zamenjava briše zgodovino"],"correct":1,"explanation":"Ni nujno, da se odločiš samo za eno. Mnogi kombinirajo okolja glede na situacijo — Desktop za lokalno delo, Web za GitHub projekte ali oddaljeni dostop."}]},{"id":4,"lesson":"Lekcija 2","title":"Your first prompt: Načini dela in pisanje promptov","features":[{"id":23,"section_id":4,"name":"Pisanje promptov","icon":"ti-message-2","badge_type":"when","badge_text":"Osnova dela","short_desc":"Govori Claude Code-u opisno in jasno — kakovost prompta določa kakovost rezultata","what_it_does":"Vnosi prompte v naravnem jeziku — ni posebne sintakse. Povej cilj, kontekst in omejitve. Claude Code razume namere, podobno kot bi govoril z izkušenim razvijalcem.","when_to_use":"Vsakič. Bolj ko si opisen o cilju in kontekstu, boljši rezultat. Povej, kaj hočeš doseči — ne samo kaj narediti.","when_not":"Izogibaj se prekratkim ukazom za kompleksne naloge. 'Popravi bug' brez konteksta ne bo dalo dobrega rezultata.","why_it_matters":"Prompt je tvoje edino orodje za komunikacijo z agentom. Boljše vprašanje = boljša rešitev.","sort_order":1},{"id":24,"section_id":4,"name":"Approval Mode","icon":"ti-hand-stop","badge_type":"when","badge_text":"Varno","short_desc":"Claude vpraša za dovoljenje pred vsako spremembo datoteke ali ukazom","what_it_does":"Privzeti način. Pred vsako akcijo Claude Code pokaže, kaj namerava narediti, in počaka na potrditev. Polni nadzor nad vsako spremembo.","when_to_use":"Kadar delaš na novem projektu, ko se učiš, ali ko delaš spremembe, ki jih ni enostavno razveljaviti.","when_not":"Za rutinska opravila na testnem okolju je morda počasen — takrat razmisli o Auto-accept Mode.","why_it_matters":"Preden karkoli spremenijo v tvojem sistemu, ti to pokažejo. Idealno za učenje in kritično okolje.","sort_order":2},{"id":25,"section_id":4,"name":"Auto-accept Mode","icon":"ti-bolt","badge_type":"caution","badge_text":"Hitro","short_desc":"Spremembe datotek se sprejmejo samodejno — ukazi še vedno čakajo na potrditev","what_it_does":"Claude Code ureja datoteke brez vsakokratnega dovoljenja. Terminal ukazi (npm, git…) pa še vedno zahtevajo potrditev.","when_to_use":"Za hitrejše iteracije na testnem projektu, ko zaupate drug drugemu in dobro razumeš, kaj Claude Code počne.","when_not":"Ne na produkcijskem sistemu. Ne za kodo, ki je nisi pregledal. Napako je težje ujeti, ko se zgodi samodejno.","why_it_matters":"Produktivnostno orodje — a odgovornost za napake je tvoja. Hitreje ≠ varneje.","sort_order":3},{"id":26,"section_id":4,"name":"SHIFT+TAB meni","icon":"ti-keyboard","badge_type":"when","badge_text":"Bližnjica","short_desc":"Tipki SHIFT+TAB v terminalu ciklata med Approval, Auto-accept in Plan Mode","what_it_does":"Med delom pritisni SHIFT+TAB, da ciklaš med načini: Default (Approval) → Auto-accept → Plan Mode → nazaj na Default. Hitro dostopen brez nastavitev.","when_to_use":"Kadar med sejo želiš spremeniti način dela brez ponovnega zagona ali nastavitev.","when_not":"V IDE razširitvi (VS Code, JetBrains) je dostop do načinov v meniju IDE-ja — tam SHIFT+TAB ne deluje enako.","why_it_matters":"En pritisk tipke, tri različna vedenja. Fleksibilnost brez konfiguracije — takoj na voljo med delom.","sort_order":4},{"id":27,"section_id":4,"name":"Plan Mode","icon":"ti-clipboard-list","badge_type":"when","badge_text":"Premisli najprej","short_desc":"Prek SHIFT+TAB do Plan Mode — Claude bere in planira, nobenih sprememb dokler ne odobriš","what_it_does":"Plan Mode aktiviraš s SHIFT+TAB (ali z besedo 'plan' v promptu). Claude Code prebere kodo, postavi vprašanja in predlaga natančen načrt. Nobene spremembe se ne zgodijo, dokler ne odobriš.","when_to_use":"Pred kompleksnimi implementacijami: nova funkcionalnost čez več datotek, refaktoring, migracije. Primer: 'dark mode čez celotno aplikacijo'.","when_not":"Za enostavne, enodatotečne spremembe Plan Mode doda nepotrebne korake — za to je Default Mode hitrejši.","why_it_matters":"Vidiš točno, kaj bo Claude Code naredil — preden to naredi. Nobenih presenečenj, nobenih nepopravljivih napak.","sort_order":5}],"notes":[{"id":16,"section_id":4,"note_type":"desc","content":"Vse začne se s promptom. Claude Code razume naravni jezik — ni ukaza, ki bi ga moral zapomniti. Ključno je razumeti, kateri način dela izbrati za vsako situacijo.","sort_order":-2},{"id":17,"section_id":4,"note_type":"tip","content":"SHIFT+TAB v terminalu cikla med načini: Approval → Auto-accept → Plan Mode. Ni potrebno restartati — preklopiš med delom.","sort_order":-1},{"id":18,"section_id":4,"note_type":"warning","content":"Auto-accept Mode je hitrejši — a napako je težje ujeti, preden se zgodi. Začni z Approval Mode, preklopi šele ko dobro razumeš, kaj Claude Code počne.","sort_order":10},{"id":19,"section_id":4,"note_type":"youtube","content":"gbetp6D7J_Q","sort_order":-3},{"id":20,"section_id":4,"note_type":"subsection-header","content":"Primer v praksi: Plan Mode","sort_order":8},{"id":21,"section_id":4,"note_type":"desc","content":"Recimo, da tvoja aplikacija potrebuje dark mode po celotni kodi. Odpri korenski direktorij projekta in zaženi <code>claude</code>. Pritisni <strong>Shift+Tab</strong> dvakrat, da preklopliš v Plan Mode — Claude bo prebral kodo in sestavil natančen načrt. Vpiši: <em>\"My app needs a dark mode implemented across the entire app.\"</em> Claude ne bo nič spremenil — samo načrtoval. Ko načrt odobriš, preide v izvedbo in te sproti vpraša za dovoljenje pri vsakem koraku. Na koncu točno vidiš, kaj je naredil in zakaj.","sort_order":9}],"questions":[{"id":33,"q":"Kako aktiviraš Plan Mode v terminalu?","options":["Z nastavitvami Claude Code","S tipkama SHIFT+TAB (cikel do Plan Mode)","Z ukazom /plan v promptu","Z restartem terminala"],"correct":1,"explanation":"SHIFT+TAB cikla med načini: Approval → Auto-accept → Plan Mode. Aktiviraš ga z večkratnim pritiskom."},{"id":34,"q":"Kaj naredi Auto-accept Mode?","options":["Izvede vse brez kakršnega koli vprašanja","Samodejno sprejme spremembe datotek, ukazi pa še zahtevajo potrditev","Onemogoči Claude Code","Samo bere kodo brez sprememb"],"correct":1,"explanation":"V Auto-accept Mode se datoteke uredijo samodejno, ampak terminalni ukazi (npm, git…) še vedno zahtevajo potrditev."},{"id":35,"q":"Kateri način dela je privzeti (default)?","options":["Auto-accept Mode","Plan Mode","Approval Mode","Read-only Mode"],"correct":2,"explanation":"Privzeti način je Approval Mode — Claude Code vpraša za dovoljenje pred vsako spremembo ali ukazom."},{"id":36,"q":"Kaj se zgodi v Plan Mode?","options":["Claude Code takoj izvede vse spremembe","Claude Code bere kodo in predlaga načrt — nobenih sprememb, dokler ne odobriš","Claude Code se izklopi","Samo terminalni ukazi se izvajajo"],"correct":1,"explanation":"Plan Mode je bralno-analitičen — nobene spremembe se ne zgodijo. Šele po odobritvi načrta preide v izvedbo."},{"id":37,"q":"Kako napišeš učinkovit prompt za Claude Code?","options":["Čim krajši, da ne zapravljaš tokenov","Opisno — povej cilj, kontekst in omejitve","Samo z ukazi, brez razlag","Vedno v angleščini"],"correct":1,"explanation":"Kakovost prompta določa kakovost rezultata. Bolj ko si opisen o cilju in kontekstu, boljšo rešitev boš dobil."},{"id":38,"q":"Kaj naredi SHIFT+TAB med delom v terminalu?","options":["Prekine Claude Code","Shrani pogovor","Cikla med načini: Approval → Auto-accept → Plan Mode","Odpre nastavitve"],"correct":2,"explanation":"SHIFT+TAB je hitri dostop do menjave načinov — brez ponovnega zagona ali nastavitev."},{"id":39,"q":"Ali Auto-accept Mode zahteva potrditev za terminalne ukaze?","options":["Ne — vse sprejme samodejno","Da — datoteke so samodejne, ukazi pa še vedno zahtevajo potrditev","Samo za git ukaze","Samo za npm ukaze"],"correct":1,"explanation":"Auto-accept Mode ne pomeni vse samodejno. Datoteke se uredijo brez vprašanja, a terminalni ukazi ostanejo zaklenjeni za potrditev."},{"id":40,"q":"Za kakšno nalogo je Plan Mode posebej primeren?","options":["Za popravek tipkarske napake","Za branje dokumentacije","Za kompleksne spremembe čez več datotek, npr. dark mode čez celotno aplikacijo","Za namestitev paketa"],"correct":2,"explanation":"Plan Mode zasije pri večjih implementacijah — vidite natančno, kaj bo Claude Code naredil, preden to naredi. Idealno za multi-file spremembe."}]}]},{"id":3,"title":"Daily workflows","objectives":["Razumeti 4-fazni Explore → Plan → Code → Commit workflow kot osnovo vsakodnevnega dela","Vedeti, kdaj in kako uporabiti Plan Mode za varno načrtovanje pred izvedbo","Znati definirati success criteria in test suite za boljše rezultate","Razumeti vlogo subagent code reviewerja pred commitom"],"reflections":["Zakaj je Explore faza pomembna, preden Claude sploh začne pisati kodo?|Explore faza je brezplačna informacija. Claude zbere kontekst — datoteke, splet, strukturo projekta — preden karkoli naredi. Brez tega skače v kodo na slepo.","Kdaj bi prekinil Code fazo in prosil Claude za popravek načrta?|Ko Claude naleti na nepričakovano oviro ali predlaga rešitev, ki se ti zdi napačna. Plan Mode je vedno na voljo — prekini, pojdi nazaj v načrtovanje.","Kaj bi shranil v CLAUDE.md, da Claude ne ponavlja istih napak?|Specifične rešitve za ponavljajoče se probleme v projektu — npr. kateri ukazi ne delujejo, katere konvencije upoštevati, kateri deli kode so občutljivi."],"sections":[{"id":5,"lesson":"Lekcija 1","title":"Explore → Plan → Code → Commit: Workflow za vsakodnevno delo","features":[{"id":28,"section_id":5,"name":"Explore","icon":"ti-search","badge_type":"when","badge_text":"Osnova","short_desc":"Plan Mode bere datoteke in splet — razume projekt, preden karkoli naredi","what_it_does":"V Explore fazi Claude v Plan Mode prebere relevantne datoteke, požene spletna iskanja in zbere vse, kar potrebuje za razumevanje projekta. Nič se ne spremeni — samo zbira kontekst.","when_to_use":"Vedno na začetku vsake večje naloge — Explore faza je brezplačna informacija, ki prepreči napake pozneje.","when_not":"Ne preskoči Explore faze pri kompleksnih nalogah. Hitrost brez konteksta pomeni napake, ki jih je drago popraviti.","why_it_matters":"Claude Code je toliko boljši, kolikor bolje razume projekt. Explore mu da ta kontekst — brez vsakega tveganja.","sort_order":1},{"id":29,"section_id":5,"name":"Plan","icon":"ti-clipboard-list","badge_type":"when","badge_text":"Preveri najprej","short_desc":"Claude sestavi natančen načrt — ti ga pregledaš in odobriš preden karkoli naredi","what_it_does":"Po Explore fazi Claude sestavi načrt: kaj bo naredil, v katerem vrstnem redu, katere datoteke bo spremenil. Ti pregledaš in se odločiš: odobriš, popraviš ali prosiš za revizijo.","when_to_use":"To je najboljši trenutek za course-correct — preden je karkoli napisano. Če načrt ne ustreza, povej zdaj.","when_not":"Ne odobri načrta na hitro, če česa ne razumeš. Vprašaj Claude za razlago posameznih korakov — to je brezplačno.","why_it_matters":"Plan faza je varnostna mreža. Napaka v načrtu je brezplačna — napaka v kodi stane čas.","sort_order":2},{"id":30,"section_id":5,"name":"Code","icon":"ti-code","badge_type":"when","badge_text":"Izvedi","short_desc":"Claude dela po načrtu — Approval ali Auto-accept, ti vidiš vsak korak","what_it_does":"Ko odobriš načrt, Claude preide v izvedbo. Izbiraš: Approval Mode vpraša za vsako datoteko, Auto-accept ureja samodejno. Claude bo troubleshootал ovire in te sproti obveščal o odločitvah.","when_to_use":"Ko si zadovoljen z načrtom. Ostani v zanki — Claude bo postavljal vprašanja in potreboval tvoje odločitve.","when_not":"Ne izklopi pozornosti v Code fazi. Claude bo včasih naletel na nepričakovane ovire in potreboval tvojo usmeritev.","why_it_matters":"Code faza je kjer se načrt sreča z realnostjo. Tvoja prisotnost zagotavlja, da Claude ne zavije s poti.","sort_order":3},{"id":31,"section_id":5,"name":"Commit","icon":"ti-git-commit","badge_type":"when","badge_text":"Zaključi","short_desc":"Subagent pregleda kodo, Claude napiše commit message — in začneš znova","what_it_does":"Ko si zadovoljen z rezultati, poženi subagent code reviewer — svež par oči brez pristranskosti glavne seje. Nato Claude napiše commit message v tvojem stilu. Ponovi cikel.","when_to_use":"Pred vsakim commitom — subagent reviewer ujame, kar glavna seja spregleda, ker nosi kontekst celotnega pogovora.","when_not":"Ne preskoči code review koraka pri večjih spremembah. Subagent je hiter varnostni korak z velikim učinkom.","why_it_matters":"Commit je zaključek zanke. Subagent reviewer zagotavlja svež pogled — brez pristranskosti, ki jo prinese dolga delovna seja.","sort_order":4},{"id":32,"section_id":5,"name":"Success criteria","icon":"ti-target","badge_type":"caution","badge_text":"Definiraj najprej","short_desc":"Povej Claude, kako izgleda 'pravilno' — brez tega sam ugiba","what_it_does":"Preden Claude začne, mu povej, kako bo vedel, da je naloga opravljena. Konkretni kriteriji: 'aplikacija se naloži brez napak', 'vsi testi zeleni', 'dark mode deluje na vseh straneh'.","when_to_use":"Vedno, pri vsaki večji nalogi. Success criteria so del prompta — ne ločen korak.","when_not":"Ne prepusti Claudu, da sam definira 'finished'. Brez kriterijev bo naredil, kar se mu zdi smiselno — ne nujno, kar si ti hotel.","why_it_matters":"Claude je samozavesten izvajalec. Brez jasnih kriterijev bo 'finished' razlagal po svoje — in to je pogost vir razočaranj.","sort_order":5},{"id":33,"section_id":5,"name":"Test suite","icon":"ti-test-pipe","badge_type":"when","badge_text":"Priporočeno","short_desc":"Daj Claude teste — sam bo preverjal rezultate brez tvojega vmešavanja","what_it_does":"Če projekt ima teste, jih daj Claudu kot del naloge. Claude bo sam zaganjal teste po vsaki spremembi in preverjal, ali je na pravi poti — brez da bi mu moral ti vsakič reči.","when_to_use":"Kadar koli imaš test suite — to je ena najmočnejših stvari, ki jih Claude Code zna narediti samodejno.","when_not":"Pred oddajo testov preveri, da niso 'lažno zeleni'. Claude jih bo resno jemal, tudi napačne.","why_it_matters":"Testi so Claudov GPS. Z njimi ve točno, kdaj je dosegel cilj — brez ugibanja in brez tvojega vmešavanja pri vsakem koraku.","sort_order":6},{"id":34,"section_id":5,"name":"CLAUDE.md","icon":"ti-file-text","badge_type":"rare","badge_text":"Redko","short_desc":"Shrani rešitve ponavljajočih se težav — Claude jih bo bral vsako sejo","what_it_does":"CLAUDE.md je datoteka v korenu projekta, ki jo Claude Code prebere ob vsakem zagonu. Vanjo shraniš rešitve za probleme, ki se ponavljajo — da Claude ne ponavlja istih napak v prihodnjih sejah.","when_to_use":"Ko opaziš, da Claude v vsaki seji naleti na isti problem. Shrani rešitev enkrat, Claude jo bo upošteval vedno.","when_not":"Ne napiši vsega v CLAUDE.md — samo kar je res specifično za projekt. Preveč informacij pomeni preveč šuma.","why_it_matters":"CLAUDE.md je dolgoročni spomin projekta. Brez njega vsaka seja začne od začetka — z njim Claude ve, kaj je že naučen.","sort_order":7}],"notes":[{"id":22,"section_id":5,"note_type":"youtube","content":"xJQuF02NAK8","sort_order":-3},{"id":23,"section_id":5,"note_type":"desc","content":"Explore → Plan → Code → Commit je najpomembnejši workflow v Claude Code. Brez tega večina začetnikov skači naravnost v Code fazo — in porablja čas za popravljanje namesto ustvarjanja.","sort_order":-2},{"id":24,"section_id":5,"note_type":"tip","content":"Vstopi v Plan Mode s Shift+Tab v terminalu — pritiskaj dokler ne vidiš 'Plan Mode' pod vnosnim poljem. V Plan Mode Claude bere in načrtuje, ne izvaja.","sort_order":-1},{"id":25,"section_id":5,"note_type":"subsection-header","content":"Nasveti za Code fazo","sort_order":8},{"id":26,"section_id":5,"note_type":"tip","content":"Definiraj success criteria v promptu — 'naloga je opravljena, ko vsi testi zeleni in aplikacija se naloži brez napak'. Claude bo to upošteval pri vsaki odločitvi.","sort_order":9}],"questions":[{"id":41,"q":"Kateri je prvi korak v Explore → Plan → Code → Commit workflowu?","options":["Takoj začni pisati kodo","Explore — Plan Mode prebere datoteke in splet","Odpri CLAUDE.md","Poženi teste"],"correct":1,"explanation":"Explore faza je prva — Claude v Plan Mode zbere kontekst (datoteke, splet, struktura projekta), preden karkoli naredi."},{"id":42,"q":"Zakaj je Plan faza najboljši trenutek za course-correct?","options":["Ker je Claude takrat najhitrejši","Ker še ni bila napisana nobena koda — napaka v načrtu je brezplačna","Ker je Plan Mode cenejši","Ker Claude takrat ne more narediti napak"],"correct":1,"explanation":"Plan faza je pred izvedbo — napaka v načrtu ne stane nič, napaka v kodi stane čas."},{"id":43,"q":"Kaj naredi subagent code reviewer pred commitom?","options":["Samodejno commita kodo","Pregleda kodo brez pristranskosti glavne seje — svež par oči","Izbriše nepotrebne datoteke","Napiše dokumentacijo"],"correct":1,"explanation":"Subagent nima konteksta dolge seje — zato ujame, kar glavna seja spregleda zaradi pristranskosti."},{"id":44,"q":"Zakaj je pomembno definirati success criteria pred začetkom?","options":["Samo iz organizacijskih razlogov","Brez kriterijev Claude sam definira 'finished' — ne nujno kot ti hočeš","Da Claude dela hitreje","Ker je to zahteva Anthropic"],"correct":1,"explanation":"Claude je samozavesten izvajalec. Brez jasnih kriterijev bo 'finished' razlagal po svoje — in to je pogost vir razočaranj."},{"id":45,"q":"Kaj je CLAUDE.md?","options":["Anthropic dokumentacija","Datoteka v projektu, ki jo Claude bere ob vsakem zagonu — dolgoročni spomin projekta","Shramba za API ključe","Nastavitve za VS Code"],"correct":1,"explanation":"CLAUDE.md je projektni spomin — shrani rešitve za ponavljajoče se težave, da Claude ne začne od začetka vsako sejo."},{"id":46,"q":"Kako aktiviraš Plan Mode v terminalu?","options":["Z ukazom 'plan'","S Shift+Tab dokler ne vidiš 'Plan Mode' pod vnosnim poljem","Z ukazom '/plan'","Samodejno se aktivira ob zagonu"],"correct":1,"explanation":"Shift+Tab cikla med Approval, Auto-accept in Plan Mode. Pritiskaj dokler ne vidiš 'Plan Mode' pod vnosnim poljem."},{"id":47,"q":"Zakaj je priporočljivo dati Claudu test suite med Code fazo?","options":["Ker je to obvezno","Claude bo sam zaganjal teste in vedel, kdaj je na pravi poti — brez tvojega vmešavanja","Da je koda lepša","Ker Claude ne zna pisati testov"],"correct":1,"explanation":"Testi so Claudov GPS — sam preveri po vsaki spremembi, ali je dosegel cilj, brez da bi mu moral ti vsakič reči."},{"id":48,"q":"V kateri fazi workflowa je 'course-correct' najcenejši?","options":["Code — ko je koda že napisana","Commit — na koncu","Plan — preden je karkoli izvedeno","Explore — na samem začetku"],"correct":2,"explanation":"Plan faza je pred izvedbo — napaka v načrtu ne stane nič. Ko je koda enkrat napisana, je popravek dražji."}]},{"id":6,"lesson":"Lekcija 2","title":"Context Management: Upravljanje kontekstnega okna","features":[{"id":35,"section_id":6,"name":"Kontekstno okno","icon":"ti-brain","badge_type":"when","badge_text":"Delovna memoria","short_desc":"Vsak prompt, prebrana datoteka, ukaz in rezultat zasede prostor v kontekstnem oknu","what_it_does":"Context window je Claude-ova delovna memoria — vsak tvoj prompt, vsaka prebrana datoteka, vsak zagnani ukaz in vsak rezultat orodja zasede del tega prostora. Ko se prostor napolni, postane upravljanje kljucno.","when_to_use":"Razumevanje context window ti pomaga pisati boljse prompte in izbrati pravi ukaz za upravljanje seje (/compact ali /clear).","when_not":"Ne misli, da ti ni treba skrbeti za kontekst samo zato, ker ima Claude Code samodejni compaction — ta resi krizo, ne prepreci suma.","why_it_matters":"Omejen prostor pomeni, da vsak nepotrebni korak stane. Boljse razumevanje = manj zapravljenega prostora = boljsi rezultati v dolgi seji.","sort_order":1},{"id":36,"section_id":6,"name":"Samodejni compaction","icon":"ti-arrows-minimize","badge_type":"when","badge_text":"Samodejno","short_desc":"Ko se okno napolni, Claude sam stisne pogovor in odstrani nepotrebne rezultate","what_it_does":"Ko se kontekstno okno napolni, Claude samodejno stisne pogovor: povzame prejsnje dele in odstrani nepotrebne rezultate orodij, da sprosti prostor za nadaljevanje dela.","when_to_use":"Zavedaj se ga, ko opaziš, da Claude pozablja zgodnejse podrobnosti iz seje — to je znak, da se je compaction ze zgodil.","when_not":"Samodejni compaction je varnostna mreza, ne strategija. Za dolge seje ga ne cakaj — uporabljaj /compact proaktivno.","why_it_matters":"Omogoca delo brez prekinitve, a del konteksta se ob tem vedno izgubi. Proaktivno upravljanje je boljse od reaktivnega resevanja.","sort_order":2},{"id":37,"section_id":6,"name":"/compact","icon":"ti-player-skip-forward","badge_type":"when","badge_text":"Med sejo","short_desc":"Rocno sprozi kompakcijo — stisne pretekli pogovor, nadaljujes z manj suma","what_it_does":"Ukaz /compact rocno stisne vse, kar je v kontekstu do tega trenutka. Claude ohrani spomin na to, kaj ste delali, a odstrani podrobnosti in rezultate, ki jih ne potrebuje vec.","when_to_use":"Ko delaš na isti funkcionalnosti in se blizaš kontekstnemu limitu, a hoces nadaljevati brez izgube niti. Sprozi /compact preden se okno napolni samodejno.","when_not":"Ne za prehod na novo, nepovezano nalogo — tam je /clear boljsa izbira.","why_it_matters":"Daje ti nadzor nad tem, kdaj in kako se kontekst sprosti — boljse od cakanja na samodejni compaction, ki se zgodi v nepravem trenutku.","sort_order":3},{"id":38,"section_id":6,"name":"/clear","icon":"ti-refresh","badge_type":"caution","badge_text":"Brez spomina","short_desc":"Popolna ponastavitev — izbrise celoten kontekst, Claude zacne popolnoma sveze","what_it_does":"Ukaz /clear odstrani celoten kontekst — pogovor, prebrane datoteke, rezultate orodij. Claude nima nobenega spomina na prejsnjo sejo in zacne kot pri prvem zagonu.","when_to_use":"Ko prehajate na novo, nepovezano nalogo. Prejsnji pogovor bi samo vnasˇal pristranskost v novo smer.","when_not":"Ne, ce bos v novi seji potreboval karkoli iz te. Vse, kar hoces obdrzati, shrani v CLAUDE.md preden pozenete /clear.","why_it_matters":"Cist zacetek je vcase edina prava odlocitev — a je nepovratna. /clear je orodje za premisleno uporabo, ne za hitro resevanje zapolnjenega okna.","sort_order":4},{"id":39,"section_id":6,"name":"/context","icon":"ti-chart-bar","badge_type":"when","badge_text":"Diagnostika","short_desc":"Vizualni pregled porabe kontekstnega prostora — katere kategorije jedo najvec","what_it_does":"Ukaz /context prikazˇe pregled stanja kontekstnega okna: koliko prostora je zasedenega, katere kategorije (pogovor, datoteke, rezultati orodij) porabijo najvec, in vizualni grafikon porabe.","when_to_use":"Ko cutiš, da seje postajajo pocasnejse ali manj fokusirane — preveri najprej s /context, preden se odlociš za /compact ali /clear.","when_not":"Ni nujno po vsaki seji — uporabi ga diagnosticno, ko imas sum, da kontekst postaja problem.","why_it_matters":"Ne moreš upravljati tega, cesar ne vidiš. /context ti da podatke za informirano odlocitev — brez ugibanja.","sort_order":5},{"id":40,"section_id":6,"name":"Specificni prompti","icon":"ti-message-2","badge_type":"when","badge_text":"Varčevanje","short_desc":"Natancen prompt stane manj konteksta kot splosˇen — Claude manj isce, bolj dela","what_it_does":"Splosˇen prompt prisili Claude, da sam razisce kodo, naredi vec iskanj in opravi vec sklepanja — kar zasede bistveno vec prostora kot natancen prompt z jasnimi navodili.","when_to_use":"Vedno. Vec konteksta, ki ga das sam (cilj, omejitve, relevantne datoteke), manj prostora porabi Claude za samodejno iskanje.","when_not":"Ne pretiravaj s tem, da vnaprej prilepis ogromne datoteke — cilj je fokus, ne obseg.","why_it_matters":"Paradoks konteksta: krajsi, splosˇen prompt stane vec prostora v zanki, kot daljsi, natancen prompt. Specificnost je nalozba, ki se povrne.","sort_order":6},{"id":41,"section_id":6,"name":"MCP strežniki","icon":"ti-plug","badge_type":"caution","badge_text":"Upravljaj","short_desc":"Claude naloži orodja vseh aktivnih MCP strežnikov v kontekst — ugasni neuporabljene","what_it_does":"Claude naloži seznam vseh orodij vsakega aktivnega MCP strežnika v kontekstno okno samodejno — tudi tistih, ki jih za trenutni projekt sploh ne uporabljas.","when_to_use":"Ugasni MCP strežnike, ki niso relevantni za projekt. Skills so alternativa, ki deluje podobno kot MCP, a ne zasede prostora v kontekstu vnaprej.","when_not":"Ne ugasni strežnikov, ki jih aktivno potrebujes — ampak premisli, koliko jih imas hkrati aktivnih.","why_it_matters":"Nepotrebni MCP strežniki so tihi porabniki konteksta. Aktivnih 5 strežnikov z 20 orodji zasede precejsen del okna, preden sploh zacznete delati.","sort_order":7},{"id":42,"section_id":6,"name":"Subagenti","icon":"ti-users","badge_type":"when","badge_text":"Čist kontekst","short_desc":"Tecejo z locenim kontekstom — vrnejo samo rezultat, tvoj glavni kontekst ostane cist","what_it_does":"Subagenti so loceni agenti z lastnim kontekstnim oknom. Opravijo specificno nalogo (npr. poiscejo vse authentication endpointe) in vrnejo samo rezultat — brez da bi obremenili tvoj glavni kontekst.","when_to_use":"Za naloge, kjer potrebujes samo odgovor, ne celotnega procesa: iskanje po kodi, analiza datoteke, preverjanje dokumentacije.","when_not":"Ne za naloge, kjer Claude potrebuje ves kontekst tvoje seje — tam subagent ne bo imel dovolj informacij.","why_it_matters":"Subagenti so paralelna racunska moc s locenim kontekstom. Delegiras iskanje, dobis odgovor — tvoj kontekst ostane cist za dejansko delo.","sort_order":8}],"notes":[{"id":27,"section_id":6,"note_type":"youtube","content":"eW3oTyfeWZ0","sort_order":-3},{"id":28,"section_id":6,"note_type":"desc","content":"Kontekst je Claude-ova delovna memoria. Vsak prompt, vsaka prebrana datoteka, vsak rezultat orodja zasede prostor v kontekstnem oknu — in ker je prostora omejeno, je upravljanje konteksta kljucno za dolge, produktivne seje.","sort_order":-2},{"id":29,"section_id":6,"note_type":"tip","content":"Ukaze /compact, /clear in /context vtipkas direktno v pogovorno polje med sejo — ni jih treba pomniti, dovolj je, da ves, da obstajajo.","sort_order":-1},{"id":30,"section_id":6,"note_type":"subsection-header","content":"/compact ali /clear?","sort_order":10},{"id":31,"section_id":6,"note_type":"tip","content":"/compact = nadaljuj z manj suma (Claude ohrani spomin). /clear = nov zacetek za novo nalogo — prej shrani vse pomembno v CLAUDE.md.","sort_order":11},{"id":32,"section_id":6,"note_type":"warning","content":"/clear izbrise ves kontekst brez moznosti povratka. Preden ga pozenete, premisli: bo Claude v novi seji potreboval kaj iz te? Ce da — shrani v CLAUDE.md.","sort_order":12}],"questions":[{"id":49,"q":"Kaj zapolni prostor v kontekstnem oknu?","options":["Samo tvoji prompti","Prompti, prebrane datoteke, ukazi in rezultati orodij","Samo rezultati ukazov","Samo koda projekta"],"correct":1,"explanation":"Vsak prompt, vsaka prebrana datoteka, vsak zagnani ukaz in vsak rezultat orodja zasede del kontekstnega okna."},{"id":50,"q":"Kaj se zgodi, ko se kontekstno okno napolni?","options":["Claude Code se ustavi","Claude samodejno stisne pogovor in odstrani nepotrebne rezultate","Izgubi se ves kontekst","Seja se zakljuci"],"correct":1,"explanation":"Samodejni compaction stisne pogovor in odstrani nepotrebne rezultate orodij, da sprosti prostor. Del konteksta se ob tem izgubi."},{"id":51,"q":"Ali samodejni compaction vedno ohrani vse podrobnosti?","options":["Da, brez izgube","Ne — del konteksta se ob compactionu vedno izgubi","Samo izgubi rezultate orodij","Odvisno od projekta"],"correct":1,"explanation":"Samodejni compaction je varnostna mreza, ne brez stroskov. Del konteksta — podrobnosti in rezultati — se ob stiskanju izgubi."},{"id":52,"q":"Kaj naredi ukaz /compact?","options":["Izbrise ves kontekst","Rocno stisne pogovor — Claude ohrani spomin, a odstrani nepotrebne podrobnosti","Pokaze pregled porabe konteksta","Zapre sejo"],"correct":1,"explanation":"/compact rocno stisne vse do tega trenutka. Claude ohrani spomin na potek dela, a odstrani podrobnosti, ki jih ne potrebuje vec."},{"id":53,"q":"Kaj naredi ukaz /clear?","options":["Stisne kontekst","Odstrani samo rezultate orodij","Izbrise celoten kontekst — Claude zacne popolnoma sveze brez spomina","Pokaze stanje konteksta"],"correct":2,"explanation":"/clear odstrani VSE — pogovor, datoteke, rezultate. Claude nima nobenega spomina na prejsnjo sejo."},{"id":54,"q":"Kdaj je /compact boljsa izbira kot /clear?","options":["Ko zacrneš novo, nepovezano nalogo","Ko hoces nadaljevati isto nalogo z manj suma, brez izgube niti","Ko je kontekstno okno popolnoma prazno","Ko Claude naredi napako"],"correct":1,"explanation":"/compact je za nadaljevanje — ohrani spomin in stisne sum. /clear je za svez start na novi nalogi."},{"id":55,"q":"Kaj prikazˇe ukaz /context?","options":["Zgodovino ukazov","Vizualni pregled porabe kontekstnega okna po kategorijah","Seznam vseh datotek v projektu","Nastavitve Claude Code"],"correct":1,"explanation":"/context pokazˇe, koliko prostora je zasedenega, katere kategorije porabijo najvec, in vizualni grafikon — diagnosticno orodje za informirano odlocitev."},{"id":56,"q":"Zakaj natancen prompt zasede manj konteksta kot splosˇen?","options":["Ker je krajsi v znakih","Ker Claude z jasnimi navodili manj isce po kodi in opravi manj sklepanja","Ker Claude splosnih promptov ne razume","Ker splosni prompti niso podprti"],"correct":1,"explanation":"Splosˇen prompt prisili Claude k vec iskanjem in sklepanju — to zasede bistveno vec prostora kot natancen prompt z jasnim ciljem."},{"id":57,"q":"Zakaj je dobro ugasniti MCP strežnike, ki jih ne potrebuješ?","options":["Ker upocasnijo internet","Claude naloži orodja vseh aktivnih strežnikov v kontekst samodejno — neuporabljeni jedo prostor brez koristi","Ker so nevarni","Ker jih Claude ne zna uporabljati"],"correct":1,"explanation":"Claude naloži seznam orodij vsakega aktivnega MCP strežnika v kontekst — tudi neuporabljenih. Ugasni kar ne potrebuješ za projekt."}]},{"id":7,"lesson":"Lekcija 3","title":"Code Review: Git workflow z Claude Code","features":[{"id":43,"section_id":7,"name":"Subagent reviewer","icon":"ti-eye-check","badge_type":"when","badge_text":"Pred PR-jem","short_desc":"Svez kontekst, brez pristranskosti — ne ve, kako si kodo napisal, samo ali deluje","what_it_does":"Subagent za code review tece v lastnem kontekstnem oknu — brez spomina na to, kako je bila koda napisana. To mu da svez pogled, ki ga glavna seja nima, ker je ves cas nosila breme pisanja.","when_to_use":"Pred vsakim PR-jem. Prosi Claude: »Pozeni subagenta, ki bo pregledal spremembe.« Subagent oznaci tezave brez pristranskosti.","when_not":"Ne namesto lastnega pregleda — subagent je dodaten par oci, ne nadomestek za razumevanje kode.","why_it_matters":"Glavna seja je slepa za napake, ki jih je sama naredila. Subagent z locenim kontekstom ujame, kar dolga delovna seja spregleda.","sort_order":1},{"id":44,"section_id":7,"name":"Read-only konfiguracija","icon":"ti-lock","badge_type":"when","badge_text":"Samo bere","short_desc":"Omeji subagenta na bralna orodja — reviewer naj oznaci tezave, ne ureja datotek","what_it_does":"Ko nastavljas subagent reviewerja, mu dovoli samo bralna orodja. Njegova naloga je oznaciti tezave — ne popravljati kode. Ce ima pisalni dostop, zacne resevati namesto pregledovati.","when_to_use":"Vedno pri konfiguraciji code-reviewer subagenta. Shrani konfiguracijo v repozitorij, da jo uporablja celotna ekipa.","when_not":"Ne za subagente, ki imajo nalogo popraviti kodo — tam je pisalni dostop smiseln. Read-only je specificno za reviewer vlogo.","why_it_matters":"Jasna vloga = boljsi rezultat. Reviewer, ki samo bere, da fokusirano povratno informacijo. Ce uredja, zacne resevati probleme namesto da bi jih identificiral.","sort_order":2},{"id":45,"section_id":7,"name":"/commit-push-pr","icon":"ti-git-pull-request","badge_type":"when","badge_text":"Vse v enem","short_desc":"En ukaz za commit + push + PR — Claude uredi celoten tok namesto tebe","what_it_does":"Skill /commit-push-pr poskrbi za celoten git tok v enem koraku: pripravi commit sporocilo, potisne spremembe in ustvari PR. Namesto treh locenih korakov — en ukaz.","when_to_use":"Ko si zadovoljen s kodo in subagent review je opravljen. Zozeni /commit-push-pr in Claude prevzame vse do odprtega PR-ja.","when_not":"Ne za vmesne commite med razvojem — tam je rucni nadzor nad commit sporocili bolj smiseln.","why_it_matters":"Odstranjuje trenje iz zadnje mile git workflowa. Manj preklopov med orodji, manj prilo znosti za napako pri commitu ali pushu.","sort_order":3},{"id":46,"section_id":7,"name":"Slack MCP obvestilo","icon":"ti-brand-slack","badge_type":"rare","badge_text":"Opcijsko","short_desc":"Ce imas Slack MCP strežnik, Claude samodejno objavi PR link v ekipni kanal","what_it_does":"Ce imas Slack MCP strežnik konfiguriran in kanale definirane v CLAUDE.md, /commit-push-pr po ustvaritvi PR-ja samodejno objavi link v ustrezni Slack kanal.","when_to_use":"V ekipah, ki sledijo PR-jem prek Slacka. Enkratna nastavitev — potem se zgodi samodejno ob vsakem PR-ju.","when_not":"Ni potrebno za individualno delo ali ekipe, ki ne uporabljajo Slacka za PR obvestila.","why_it_matters":"Ekipa je takoj obvescena o novem PR-ju brez rocnega deljenja linka. Manj administrativnega dela, vec fokusa na pregled.","sort_order":4},{"id":47,"section_id":7,"name":"--from-pr","icon":"ti-git-branch","badge_type":"when","badge_text":"Nadaljuj PR","short_desc":"Nadaljuj sejo PR-ja pozneje: claude --from-pr <PR_NUMBER> — tocno tam, kjer si ostal","what_it_does":"Ko Claude ustvari PR prek gh pr create, se seja samodejno poveze s tem PR-jem. Ce se vrnes pozneje — po review komentarjih ali neuspelem buildu — zozeni claude --from-pr <PR_NUMBER> in nadaljujes tocno tam, kjer si ostal.","when_to_use":"Ko se vracas na PR po review komentarjih, po CI napaki ali po daljsi prekinitvi. --from-pr obnovi kontekst PR-ja brez ponovnega razlaganja.","when_not":"Ni potrebno, ce ze imas odprto sejo, ki je ustvarila PR — tam je kontekst ze prisoten.","why_it_matters":"PR review je pogosto prekinjen proces — napises kodo, cakash review, popravish, again. --from-pr odstranjuje trenje pri vsakem vracanju na nedokoncano nalogo.","sort_order":5}],"notes":[{"id":33,"section_id":7,"note_type":"youtube","content":"RKsADl0ZC3Y","sort_order":-3},{"id":34,"section_id":7,"note_type":"desc","content":"Claude Code ima vgrajene funkcije, ki pospesijo git workflow. Pred vsakim PR-jem: subagent code review za svez pogled brez pristranskosti. Za commit + push + PR v enem koraku: /commit-push-pr skill. Za nadaljevanje dela na PR-ju po prekinitvi: --from-pr.","sort_order":-2},{"id":35,"section_id":7,"note_type":"tip","content":"Subagent za code review je eden najpreprostejsih nacinov, da ujamet napake, ki jih glavna seja spregleda — ker ves cas nosi kontekst pisanja kode in z njim tudi njene slepe pege.","sort_order":-1},{"id":36,"section_id":7,"note_type":"subsection-header","content":"Subagent reviewer — nastavitev","sort_order":10},{"id":37,"section_id":7,"note_type":"tip","content":"Konfiguracijo subagent reviewerja shrani v repozitorij — tako celotna ekipa uporablja enako nastavitev in enaka pravila pregleda. En reviewer za vse, ne vsak svoja nastavitev.","sort_order":11}],"questions":[{"id":58,"q":"Zakaj je subagent boljsi za code review kot glavna seja?","options":["Ker je hitrejsi","Ker tece v locenim kontekstu brez pristranskosti — ne ve, kako je bila koda napisana","Ker ima vec orodij","Ker ne potrebuje interneta"],"correct":1,"explanation":"Glavna seja nosi ves kontekst pisanja kode in z njim slepe pege. Subagent z locenim kontekstom da svez, nepristranski pogled."},{"id":59,"q":"Katera orodja mora imeti subagent code reviewer?","options":["Vsa — tudi pisalna, da lahko takoj popravi","Samo bralna — reviewer oznaci tezave, ne ureja datotek","Samo terminal","Samo dostop do spleta"],"correct":1,"explanation":"Reviewer subagent mora biti omejen na bralna orodja. Ce ima pisalni dostop, zacne resevati namesto pregledovati."},{"id":60,"q":"Zakaj shraniti konfiguracijo subagent reviewerja v repozitorij?","options":["Ker je to obvezno","Da celotna ekipa uporablja enako nastavitev in enaka pravila pregleda","Ker drugace ne deluje","Samo iz organizacijskih razlogov"],"correct":1,"explanation":"Konfiguracija v repozitoriju zagotavlja, da vsi clani ekipe uporabljajo enako nastavitev reviewerja — konsistenten pregled za vse."},{"id":61,"q":"Kaj naredi /commit-push-pr skill?","options":["Samo ustvari commit","Samo potisne spremembe","Uredi commit + push + PR ustvaritev v enem koraku","Izbrise lokalne spremembe"],"correct":2,"explanation":"/commit-push-pr prevzame celoten git tok: pripravi commit sporocilo, potisne spremembe in ustvari PR — vse v enem ukazu."},{"id":62,"q":"Kdaj Claude samodejno objavi PR link na Slack?","options":["Vedno, samodejno","Ko imas Slack MCP strežnik konfiguriran in kanale definirane v CLAUDE.md","Ko aktiviras poseben nacin","Nikoli — to moraš narediti rocno"],"correct":1,"explanation":"Slack obvestilo zahteva Slack MCP strežnik in kanale definirane v CLAUDE.md. Ko je to nastavljeno, /commit-push-pr PR link objavi samodejno."},{"id":63,"q":"Kaj naredi ukaz claude --from-pr <PR_NUMBER>?","options":["Ustvari nov PR","Izbrise PR","Obnovi sejo PR-ja in nadaljuje tocno tam, kjer si ostal","Pokaze seznam vseh PR-jev"],"correct":2,"explanation":"--from-pr obnovi kontekst PR-ja ustvarjenega prek gh pr create in nadaljuje sejo tocno tam, kjer si jo prekinil."},{"id":64,"q":"Kdaj je --from-pr najbolj koristen?","options":["Ob prvem ustvarjanju PR-ja","Ko se vracas na PR po review komentarjih ali CI napaki","Ko hoces izbrisati PR","Ko hoces spremeniti ime PR-ja"],"correct":1,"explanation":"--from-pr je za vracanje na nedokoncano nalogo — po review komentarjih, po neuspelem buildu, ali po daljsi prekinitvi. Obnovi kontekst brez ponovnega razlaganja."}]}]},{"id":4,"title":"Customizing Claude Code","objectives":["Razumeti, kako CLAUDE.md daje Claudu trajni spomin o projektu in zakaj je to ključno","Znati ustvariti, strukturirati in vzdrževati lastno CLAUDE.md datoteko","Spoznati napredne možnosti prilagoditve: Subagents, Skills, MCP in Hooks"],"reflections":["Zakaj Claude Code vsakič začne znova brez CLAUDE.md?|Brez trajnega spomina mora Claude vsakič re-explorirati kodo, ugibati o konvencijah in razumeti arhitekturo — to je izguba časa in vzrok napak.","V čem se razlikuje projektni in uporabniški CLAUDE.md?|Projektni živi v root mapi in je v version controlu — deli ga cel team. Uporabniški je v tvoji konfiguracijski mapi in velja za vse projekte — tam so tvoje osebne preference.","Kdaj je pravi čas za ustvariti CLAUDE.md?|Anthropic priporoča: začni brez nje. Ko vidiš, kje pogosto popravljaš Clauda, veš kaj dodati. Nato poženi /init in Claude ustvari izhodišče zate.","Zakaj je Skills boljša rešitev kot dodajanje vsega v CLAUDE.md?|CLAUDE.md se naloži vsakič — prekomerna vsebina poveča kontekst pri vsaki seji. Skills so na zahtevo — kličeš jih samo ko so relevantni. Ločitev 'vedno' in 'ko je treba' je ključna za zdravo upravljanje konteksta.","Kdaj bi dodal MCP strežnik in kdaj bi raje napisal Skill?|MCP: ko potrebuješ real-time dvosmerni dostop do zunanjega servisa (baza podatkov, projektno orodje). Skill: ko imaš dobro definirano proceduro in CLI ekvivalent. Skill je kontekstno cenejši — MCP primeš za trajno integracijo.","Kdaj je hook nujno potreben namesto navodila v CLAUDE.md?|Ko rabiš garancijo, ne priporočilo. Claude z navodilom v CLAUDE.md 'bo poskušal' formatirati — hook zagotovi da se to zgodi vsakič, brez izjeme. Za varnostne blokade (prepreči pisanje v produkcijo) je hook edina zanesljiva rešitev."],"sections":[{"id":8,"lesson":"Lekcija 1","title":"The CLAUDE.md file: Trajni spomin za tvoj projekt","features":[{"id":48,"section_id":8,"name":"CLAUDE.md datoteka","icon":"ti-file-description","badge_type":"when","badge_text":"Ključna funkcija","short_desc":"Markdown datoteka v root mapi projekta — Claude jo prebere ob vsakem zagonu seje","what_it_does":"CLAUDE.md je Markdown datoteka, ki jo dodaš v korensko mapo projekta. Claude Code jo prebere avtomatično ob vsakem zagonu nove seje. Njena vsebina se doda k tvojemu promptu — Claude tako vedno pozna tvoj projekt.","when_to_use":"Pri vsakem resnejšem projektu, kjer z Claudom delaš redno in ponavljajoče naloge","when_not":"Za enkratne eksperimente ali manjše skripte, kjer ne potrebuješ trajnega konteksta","why_it_matters":"Razlika med Claudom, ki ugiba, in Claudom, ki točno ve — tvoj stack, arhitektura, konvencije in ukazi","sort_order":1},{"id":49,"section_id":8,"name":"Problem brez CLAUDE.md","icon":"ti-refresh-alert","badge_type":"caution","badge_text":"Brez tega","short_desc":"Brez nje Claude vsakič začne znova — re-explorira kodo, ugiba o odvisnostih in konvencijah","what_it_does":"Vsaka nova seja brez CLAUDE.md je kot prvi dan: Claude mora re-explorirati strukturo projekta, ugibati o vzorcih in ne ve za pretekle odločitve. To vodi do napak in nepotrebnih vprašanj.","when_to_use":"Razumevanje tega problema pojasni, zakaj je CLAUDE.md tako vredna — ne kot opcija, ampak kot osnova produktivnega dela","when_not":"Na enostavnih, enkratnih projektih brez ponavljajočega dela s Claudom ta problem ni kritičen","why_it_matters":"Brez konteksta Claude dela napake: napačne knjižnice, napačni vzorci, prezrte odločitve. Z CLAUDE.md se temu izogneš.","sort_order":2},{"id":50,"section_id":8,"name":"Kaj vsebuje CLAUDE.md","icon":"ti-list-details","badge_type":"when","badge_text":"Trije bloki","short_desc":"# Project, # Commands, # Code Style — trije ključni razdelki za produktivno CLAUDE.md","what_it_does":"Tipična CLAUDE.md vsebuje tri razdelke: # Project (opis stacka in arhitekture), # Commands (ukazi za dev server, teste, lint), # Code Style (konvencije: zamiki, izvozi, struktura map). S tem Claude takoj ve vse kar potrebuje.","when_to_use":"Ko začneš nov projekt z Claudom ali ko ugotoviš, da ga pogosto popravljaš glede istih stvari","when_not":"Ne polni je z vsem — osredotoči se samo na kar Claude resnično potrebuje. Preveč konteksta je prav tako problem kot premalo.","why_it_matters":"Če napišeš 'This is a Next.js 15 app using Tailwind', Claude ne bo predlagal Bootstrap niti ne bo ustvaril API routes, kjer niso potrebne.","sort_order":3},{"id":51,"section_id":8,"name":"Hierarhija CLAUDE.md","icon":"ti-hierarchy","badge_type":"when","badge_text":"Dva nivoja","short_desc":"Projektni CLAUDE.md za team, uporabniški za tvoje osebne preference — oba delujeta skupaj","what_it_does":"Projektni CLAUDE.md živi v root mapi projekta, commitaš ga v version control — cel team ga deli. Uporabniški CLAUDE.md živi v tvoji konfiguracijski mapi in velja za vse projekte — tam so tvoje osebne preference.","when_to_use":"Projektni: za team konvencije, ki jih morajo upoštevati vsi. Uporabniški: za osebne preference (ton odgovorov, format, jezik)","when_not":"Ne podvajaj vsebine med nivojema — kar je specifično za projekt gre v projektni, kar je splošno tvoje gre v uporabniški","why_it_matters":"Claude kombinira oba avtomatično. Team dobi konsistentnost, ti pa ohranišo osebne preference brez konfliktov.","sort_order":4},{"id":52,"section_id":8,"name":"Korekture → trajni spomin","icon":"ti-brain","badge_type":"when","badge_text":"Pro nasvet","short_desc":"Ko Clauda enkrat popravljaš, ga prosi, da si to zapomni — naslednjič bo vedel sam","what_it_does":"Ko ugotoviš, da daješ ista navodila znova in znova (npr. 'vedno rabi server actions, ne API routes'), reci Claudu: 'shrani to pravilo v CLAUDE.md'. Naslednjič bo pravilo že tam, preden začneš.","when_to_use":"Vsakič ko se ujameš pri tem, da daješ ista navodila večkrat — to je signal za CLAUDE.md","when_not":"Ne dodajaj pravil za enkratne situacije. CLAUDE.md mora ostati jedrnat in fokusiran.","why_it_matters":"CLAUDE.md postane živ dokument, ki raste skupaj s projektom. Vsaka korektura je potencialno pravilo za jutri.","sort_order":5},{"id":53,"section_id":8,"name":"Začni brez nje, /init ko si pripravljen","icon":"ti-wand","badge_type":"rare","badge_text":"Za začetek","short_desc":"Anthropic priporoča: najprej brez CLAUDE.md. Ko vidiš vzorce, poženi /init","what_it_does":"Začni projekt brez CLAUDE.md — opazuj, kje vedno popravljaš Clauda. Ko vidiš vzorce, poženi /init in Claude analizira projekt ter ustvari CLAUDE.md izhodišče zate. Nato uredi po potrebi.","when_to_use":"Pri novih projektih, ko ne veš točno kaj vključiti — bolje da odkriješ organsko","when_not":"Ko prevzemaš obstoječ projekt s teamom, kjer CLAUDE.md že obstaja ali je jasno potrebna","why_it_matters":"Rezultat je boljši: CLAUDE.md, ki vsebuje samo kar res potrebuješ — ne vsak možen podatek o projektu.","sort_order":6}],"notes":[{"id":38,"section_id":8,"note_type":"youtube","content":"O0FGCxkHM-U","sort_order":-2},{"id":39,"section_id":8,"note_type":"desc","content":"CLAUDE.md je ena najpomembnejših funkcij Claude Code. Je Markdown datoteka v korenski mapi projekta, ki Claudu dá trajni spomin — vsebina se avtomatično doda k vsakemu promptu ob vsaki novi seji.","sort_order":-1},{"id":40,"section_id":8,"note_type":"tip","content":"Referenciraj dokumentacijo projekta z @ simbolom: napiši @README.md v CLAUDE.md in Claude bo vedel kje iskati dodatni kontekst.","sort_order":1},{"id":41,"section_id":8,"note_type":"desc","content":"Razlika med frustrantno in produktivno sejo s Claude Code je kontekst — in CLAUDE.md je kako ga zagotoviš. Začni s stackom, ukazi in konvencijami, nato gradišo naprej.","sort_order":2}],"questions":[{"id":65,"q":"Kje se nahaja CLAUDE.md datoteka v projektu?","options":["V root (korenski) mapi projekta","V podmapi /src","V ~/.claude/ konfiguracijski mapi","V .git/ mapi"],"correct":0,"explanation":"CLAUDE.md živi v root (korenski) mapi projekta. Claude Code jo poišče in prebere tam ob vsakem zagonu seje."},{"id":66,"q":"Kaj se zgodi z vsebino CLAUDE.md, ko začneš novo sejo?","options":["Prezre se, dokler Claude ne vpraša","Avtomatično se doda k vsakemu promptu","Shrani se v oblačno bazo","Claude jo prebere samo enkrat ob prvem zagonu"],"correct":1,"explanation":"Vsebina CLAUDE.md se avtomatično doda k tvojemu promptu ob vsakem zagonu — Claude zato vedno pozna kontekst projekta brez da mu razlagaš."},{"id":67,"q":"S katerim ukazom Claude sam ustvari CLAUDE.md na podlagi tvojega projekta?","options":["/create","/memory","/init","/setup"],"correct":2,"explanation":"Ukaz /init naroči Claudu, da analizira strukturo projekta in ustvari CLAUDE.md izhodišče. Nato ga urediš po potrebi."},{"id":68,"q":"Kje živi uporabniški (user-level) CLAUDE.md?","options":["V root mapi vsakega projekta","V tvoji konfiguracijski mapi — velja za vse projekte","V ~/.ssh/ mapi","Ne obstaja — je samo en CLAUDE.md"],"correct":1,"explanation":"Uporabniški CLAUDE.md živi v konfiguracijski mapi in velja za vse projekte. Tam shraniš osebne preference, ki se aplicirajo povsod."},{"id":69,"q":"Kaj Anthropic priporoča glede CLAUDE.md pri novem projektu?","options":["Ustvari jo takoj, preden začneš","Začni brez nje in jo dodaj ko vidiš ponavljajoče vzorce","Kopiraj od drugega projekta kot izhodišče","CLAUDE.md je opcijska in jo večina ne rabi"],"correct":1,"explanation":"Anthropic priporoča: začni brez CLAUDE.md. Ko vidiš kje pogosto popravljaš Clauda, veš kaj dodati. Nato poženi /init."},{"id":70,"q":"Kako v CLAUDE.md referenciraš dokumentacijo projekta, ki jo naj Claude prebere?","options":["Z @ simbolom in potjo datoteke, npr. @README.md","Z # simbolom, npr. #README.md","Z !import README.md","S posebnim razdelkom ## References"],"correct":0,"explanation":"Uporabi @ simbol s potjo datoteke: @README.md. Claude bo vedel, da naj prebere to dokumentacijo za dodatni kontekst."},{"id":71,"q":"Kako Anthropic opisuje CLAUDE.md v kontekstu projekta?","options":["Kot konfiguracijska datoteka za IDE","Kot backup datoteka za kodo","Kot onboarding skripta za Clauda na tvoj projekt","Kot README za razvijalce"],"correct":2,"explanation":"Anthropic opisuje CLAUDE.md kot 'onboarding script for your codebase' — pove Claudu vse kar mora vedeti o projektu, da ne začne znova vsakič."},{"id":72,"q":"Katerega od teh podatkov NE smeš shranjevati v CLAUDE.md?","options":["Ukazi za zagon dev serverja","Kodni slog in konvencije projekta","API ključi in gesla","Opis stacka in arhitekture"],"correct":2,"explanation":"CLAUDE.md je navadna besedilna datoteka, ki jo commitaš v version control — nikoli vanjo ne shranjuj gesel, API ključev ali občutljivih podatkov!"},{"id":73,"q":"Ali naj CLAUDE.md datoteko commitaš v version control (npr. Git)?","options":["Da — da jo deli cel team in vsi imajo enak kontekst","Ne — ostane samo lokalno pri tebi","Samo če delaš solo, ne v timu","Odvisno od IDE nastavitev"],"correct":0,"explanation":"CLAUDE.md commitaš v version control. Projektni CLAUDE.md je namenjen celemu timu — vsi dobijo enak kontekst za Claude Code."},{"id":74,"q":"V katerem formatu je napisana CLAUDE.md datoteka?","options":["JSON","YAML","Markdown (.md)","Plain text brez formatiranja"],"correct":2,"explanation":"CLAUDE.md je Markdown datoteka — zato ima .md končnico. Markdown format omogoča jasno strukturo z naslovi, seznami in kodo."}]},{"id":9,"lesson":"Lekcija 2","title":"Subagents: Delegiraj, ne obremenjuj","features":[{"id":54,"section_id":9,"name":"Subagent","icon":"ti-robot","badge_type":"when","badge_text":"Ključni koncept","short_desc":"Ločen agent z lastnim kontekstnim oknom — opravi nalogo in vrne samo odgovor","what_it_does":"Subagent je samostojen agent, ki ga Claude spawna znotraj tvoje seje. Dobi specifično nalogo — na primer »preiščite celotno kodo in poiščite vse klice na zunanji API« — jo izvede v svojem kontekstnem oknu in vrne samo povzetek rezultata. Tvoja glavna seja tega procesa sploh ne vidi.","when_to_use":"Ko potrebuješ odgovor na specifično vprašanje, ne pa celotnega procesa iskanja. Tipični primeri: iskanje po kodi, analiza datoteke, preverjanje dokumentacije, raziskovanje neznane baze kode.","when_not":"Ne za naloge, kjer subagent potrebuje ves kontekst tvoje trenutne seje — subagent začne brez zgodovine pogovora. Če naloga zahteva »vedeti, kaj smo že naredili«, subagent ni pravi tool.","why_it_matters":"Vsak agent — človeški ali AI — dela bolje, ko ima jasno definirano nalogo in omejen obseg. Subagent je ta princip v praksi: specializirana enota za točno določeno stvar.","sort_order":1},{"id":55,"section_id":9,"name":"Kontekstna izolacija","icon":"ti-box","badge_type":"when","badge_text":"Zakaj deluje","short_desc":"Subagent nosi vso 'umazanijo' iskanja sam — tvoj kontekst ostane čist za dejansko delo","what_it_does":"Ko Claude razišče kodo, zažene web search ali prebere množico datotek, vsaka ta operacija zasede prostor v kontekstnem oknu. Subagent to naredi v svojem, ločenem oknu. Ko konča, vrne samo povzetek — brez da bi tvoje glavno okno nosilo breme celotne poti.","when_to_use":"Vsakič, ko čutiš, da bi neka naloga 'onesnažila' tvoj kontekst z vmesnimi koraki. Iskanje, debugging specifičnega modula, analiza logov — vse to so primeri, kjer izolacija pomaga.","when_not":"Ne v primerih, kjer sta procesa med seboj prepletena in vsak korak subagenta vpliva na naslednji korak v tvoji seji. Takrat potrebuješ en skupen kontekst.","why_it_matters":"Kontekstno okno je dragocen prostor. Vsak token, ki ga zasede vmesni korak iskanja, je token manj za dejansko reševanje problema. Izolacija pomeni, da ga porabiš za tisto, kar šteje.","sort_order":2},{"id":56,"section_id":9,"name":"Vzporednost","icon":"ti-stack-2","badge_type":"when","badge_text":"Zmogljivost","short_desc":"Več subagentov teče hkrati — vzporedno, ne zaporedno","what_it_does":"Claude lahko spawna več subagentov hkrati, ki tečejo vzporedno. Medtem ko eden razišče frontend kodo, drugi analizira backend, tretji preverja dokumentacijo. Rezultati pridejo skupaj v tvojo sejo, ko so vsi končali.","when_to_use":"Ko imaš nalogo, ki jo je mogoče razdeliti na neodvisne dele. Namesto da čakaš na zaporedno izvajanje, Claude razdeli delo in ga opravi vzporedno — bistveno hitreje.","when_not":"Ne za naloge, kjer drugi subagent čaka na rezultat prvega. Vzporednost deluje samo pri neodvisnih nalogah — če med njimi obstaja odvisnost, morajo teči zaporedno.","why_it_matters":"Za tech-savvy non-developerja: predstavljaj si, da namesto enega asistenta dobiš tim specializiranih. Vsak dela na svojem delu hkrati — skupni čas je krajši, kakovost višja.","sort_order":3},{"id":57,"section_id":9,"name":"/agents ukaz","icon":"ti-terminal-2","badge_type":"when","badge_text":"Kako začeti","short_desc":"En ukaz, ki te vodi skozi ustvarjanje novega subagenta korak za korakom","what_it_does":"Poženi /agents v Claude Code in izberi »Create new agent«. Claude te vodi skozi celoten postopek: izbiro obsega agenta, definicijo namena, izbiro orodij, ki jih ima na voljo, in celo izbiro barve. Na koncu ustvari konfiguracijo zate.","when_to_use":"Ko prvič ustvarjaš subagenta ali ko ne veš natančno, kakšno konfiguracijo potrebuješ. /agents je vodeni čarovnik — ne zahteva poznavanja YAML sintakse.","when_not":"Ne za urejanje že obstoječih subagentov, ki jih že razumeš — tam je direktna ureditev YAML datoteke hitrejša.","why_it_matters":"Anthropic je zavestno naredil onboarding za subagente interaktiven. /agents znižuje vstopno bariero: ni treba razumeti formata datoteke, da začneš eksperimentirati.","sort_order":4},{"id":58,"section_id":9,"name":"YAML frontmatter","icon":"ti-file-code","badge_type":"rare","badge_text":"Redko ručno","short_desc":"Subagent je Markdown datoteka z YAML glavo — Claude jo navadno ustvari namesto tebe","what_it_does":"Vsak subagent je Markdown datoteka (.md) z YAML frontmatter na vrhu. Ta glava definira ime, opis, prompt in orodja, ki jih subagent ima na voljo. Claude ustvari to datoteko avtomatično, ko greš skozi /agents čarovnika.","when_to_use":"Ko želiš fino nastaviti subagenta, ki ga je Claude ustvaril — na primer spremeniti prompt, omejiti orodja ali dodati skill ključ. Odpreš datoteko in uredis direktno.","when_not":"Ni treba, da to razumeš za osnovno uporabo. /agents poskrbi za format — YAML je implementacijski detajl, ne pogoj za začetek.","why_it_matters":"Vedeti, da je subagent samo tekstovna datoteka, pomeni: lahko jo daš v version control, jo deliš s teamom, jo kopiraš med projekti. Ni skrite konfiguracije — vse je pregledno.","sort_order":5},{"id":59,"section_id":9,"name":"Persistent memory","icon":"ti-brain","badge_type":"when","badge_text":"Med sejami","short_desc":"Subagent si zapomni kontekst med sejami — idealno za naloge, ki se ponavljajo","what_it_does":"Z možnostjo persistent memory subagent hrani kontekst med ločenimi sejami. Ko ga naslednjič pokličeš, se spomni prejšnjih interakcij — ne začne znova od nič. To je posebej koristno, če subagenta uporabljaš redno za isti tip naloge.","when_to_use":"Ko imaš subagenta za ponavljajočo se nalogo — na primer daily code reviewer, ki sčasoma razume tvoje kodne konvencije in preference. Persistent memory naredi tega subagenta vedno boljšega.","when_not":"Ne za enkratne ali občasne naloge, kjer historia ni relevantna. Persistent memory dodaja kompleksnost — uporabi ga le, kjer prinaša opazno vrednost.","why_it_matters":"Večina AI orodij pozabi vse med sejami. Subagent s persistent memory je bolj podoben specializiranemu sodelavcu, ki se uči in izboljšuje — ne pa orodju, ki vsakič začne znova.","sort_order":6},{"id":60,"section_id":9,"name":"Preload skills","icon":"ti-books","badge_type":"when","badge_text":"Napredna konfiguracija","short_desc":"Dodaj skill ključ v YAML — celoten skill se naloži v kontekst subagenta ob zagonu","what_it_does":"V YAML frontmatter subagenta dodaš ključ skills s seznamom imen skillov. Ko se subagent zažene, se ti skilli avtomatično naložijo v njegov kontekst — ima takoj na voljo vse navodila in znanje, ki ga skill definira.","when_to_use":"Ko subagent potrebuje specifično domensko znanje za svojo nalogo — na primer code reviewer, ki mora poznati tvoje interne konvencije, ali research agent z navodili za specifičen format poročila.","when_not":"Ne za vsak subagent brez premisleka. Vsak preloadan skill poveča kontekst subagenta — naloži samo tisto, kar je relevantno za njegovo specifično nalogo.","why_it_matters":"Skills v subagentih delujejo drugače kot v glavni seji: tam se naložijo on-demand, tu pa se naložijo v celoti ob zagonu. To pomeni, da subagent deluje takoj s polnim znanjem — brez da bi ga moral posebej klicati med nalogo.","sort_order":7}],"notes":[{"id":42,"section_id":9,"note_type":"youtube","content":"jKErNxuxPXg","sort_order":-3},{"id":43,"section_id":9,"note_type":"desc","content":"Vsaka seja Claude Code ima omejeno kontekstno okno. Med delom se to okno polni: iskanje po kodi, branje datotek, web researchi — vsak korak zasede prostor. Ko kontekst zastara ali se zapolni, postane Claude manj fokusiran. Subagenti so odgovor: delegiraš specifično nalogo ločenemu agentu, ki jo opravi v svojem oknu in vrne samo rezultat. Tvoj kontekst ostane čist. Tvoja seja ostane osredotočena.","sort_order":-2},{"id":44,"section_id":9,"note_type":"tip","content":"Subagent ≠ novo okno brskalnika. Teče znotraj tvoje seje, vzporedno z njo — ima dostop do datotek tvojega projekta, a nima dostopa do zgodovine tvojega pogovora. To je namerno: svež pogled brez pristranskosti.","sort_order":1}],"questions":[{"id":75,"q":"Kaj je subagent v Claude Code?","options":["Novo okno Claude Code, ki ga odpreš ročno","Ločen agent z lastnim kontekstnim oknom, ki ga Claude spawna znotraj tvoje seje","Plugin, ki ga inštaliraš posebej","Ime za Plan Mode, ko teče brez nadzora"],"correct":1,"explanation":"Subagent je samostojen agent, ki ga Claude spawna znotraj aktivne seje. Teče v svojem kontekstnem oknu, opravi nalogo in vrne povzetek — tvoja seja ga ne 'vidi' od znotraj."},{"id":76,"q":"Zakaj kontekstna izolacija subagenta koristi tvoji glavni seji?","options":["Ker subagent dela hitreje kot glavna seja","Ker subagent porabi manj elektrike","Ker subagent nosi breme iskanja in vmesnih korakov sam — tvoje okno ostane čisto za dejansko reševanje","Ker subagent shrani rezultate na disk samodejno"],"correct":2,"explanation":"Iskanje po kodi, branje datotek in web searchi zasedejo dragocen prostor v kontekstnem oknu. Subagent te operacije izvede v svojem oknu in vrne samo povzetek — tvoj kontekst ostane rezerviran za dejansko delo."},{"id":77,"q":"Kdaj vzporednost subagentov prinese največ vrednosti?","options":["Ko je vsak naslednji subagent odvisen od rezultata prejšnjega","Ko imaš nalogo, ki jo je mogoče razdeliti na neodvisne dele, ki tečejo hkrati","Ko delaš na projektu brez kode","Ko imaš samo en subagent aktiven"],"correct":1,"explanation":"Vzporednost deluje samo pri neodvisnih nalogah. Če subagent B čaka na rezultat subagenta A, morata teči zaporedno. Ko sta nalogi neodvisni — na primer frontend in backend analiza hkrati — vzporednost bistveno skrajša skupni čas."},{"id":78,"q":"Kaj naredi ukaz /agents v Claude Code?","options":["Prikaže seznam vseh aktivnih Claude Code sej","Odpre vodeni čarovnik za ustvarjanje novega subagenta","Zažene vse subagente hkrati","Izbriše obstoječe subagente"],"correct":1,"explanation":"/agents odpre interaktivni meni, kjer izbereš 'Create new agent'. Claude te vodi skozi definicijo obsega, namena, orodij in barve subagenta — brez da bi moral ročno pisati YAML."},{"id":79,"q":"Kakšen format ima konfiguracijska datoteka subagenta?","options":["JSON datoteka s posebno ekstenzijo .agent","Python skripta, ki jo Claude izvede","Markdown datoteka z YAML frontmatter na vrhu","XML datoteka, ki jo moraš pisati ročno"],"correct":2,"explanation":"Vsak subagent je preprosta Markdown (.md) datoteka. Na vrhu ima YAML frontmatter z metapodatki (ime, opis, orodja, prompt). Claude jo ustvari avtomatično prek /agents — ročno pisanje YAML ni potrebno za začetek."},{"id":80,"q":"Kaj omogoča persistent memory pri subagentih?","options":["Subagent shranjuje rezultate v oblak","Subagent si zapomni kontekst med ločenimi sejami in postaja bolj učinkovit pri ponavljajočih nalogah","Subagent samodejno naredi backup kode","Subagent posreduje informacije med različnimi projekti"],"correct":1,"explanation":"Persistent memory pomeni, da subagent hrani kontekst med sejami. Naslednjič, ko ga pokličeš, se spomni prejšnjih interakcij. To je koristno za subagente z določeno specializirano vlogo, ki jo opravljajo redno."},{"id":81,"q":"Kako se preload skills v subagentih razlikuje od skills v glavni seji?","options":["V subagentih skills sploh ne delujejo","V glavni seji se naložijo v celoti ob zagonu, v subagentih on-demand","V subagentih se skills naložijo v celoti ob zagonu, v glavni seji pa on-demand ko jih pokličeš","Ni razlike — delujeta enako"],"correct":2,"explanation":"V glavni seji se skill naloži on-demand — ko ga eksplicitno pokličeš. V subagentih s preload skills ključem pa se skill naloži v celoti ob zagonu subagenta. Subagent ima takoj dostop do celotnega znanja skilla, brez posebnega klica."}]},{"id":10,"lesson":"Lekcija 3","title":"Skills: Knjižnica znanja na zahtevo","features":[{"id":61,"section_id":10,"name":"Skill","icon":"ti-file-sparkle","badge_type":"when","badge_text":"Ključni koncept","short_desc":"Markdown datoteka z navodili, ki jo Claude naloži na zahtevo — ne vedno, ampak samo ko je relevantna","what_it_does":"Skill je Markdown datoteka z navodili, postopki ali vzorci, shranjena v .claude/skills/. Ko pokličeš skill (/skill ime-skilla ali referenca v promptu), Claude naloži celotno vsebino v kontekst in jo upošteva pri delu. Skill se ne naloži samodejno ob vsaki seji.","when_to_use":"Za proceduralno znanje, ki ga ne rabiš vsakič — postopki deployanja, standardi code reviewa, arhitekturni vzorci, team konvencije za specifičen del sistema. Skill kličeš samo ko je relevanten.","when_not":"Ne za projektno znanje, ki ga Claude vedno potrebuje — za to je CLAUDE.md. Skill je za znanje, ki pride v poštev samo v določenih situacijah, ne v vsakdanjem delu.","why_it_matters":"Skills ti dajo knjižnico specializiranega znanja, ki ne obremenjuje konteksta dokler ga ne rabiš. CLAUDE.md je vedno prisoten, Skills so na zahtevo — ta razlika je bistvena za dolge, fokusirane seje."},{"id":62,"section_id":10,"name":"Skills vs CLAUDE.md","icon":"ti-git-compare","badge_type":"when","badge_text":"Ključna razlika","short_desc":"CLAUDE.md se naloži ob VSAKI seji — Skill samo ko ga eksplicitno pokličeš","what_it_does":"CLAUDE.md se samodejno doda k vsakemu promptu ob zagonu seje — vsebina je vedno prisotna v kontekstu. Skill se naloži samo ko ga aktiviraš (/skill ime ali omemba v promptu). Ista informacija — radikalno drugačna cena konteksta.","when_to_use":"CLAUDE.md: za vse kar Claude vedno potrebuje (stack, ukazi za zagon, konvencije, arhitektura). Skills: za proceduralno znanje z jasnim obsegom — deployment checklist, code review standard, specifičen vzorec — ki ga ne rabiš pri vsaki nalogi.","when_not":"Ne podvajaj vsebine med CLAUDE.md in Skills. Vprašaj se: je to informacija, ki jo Claude potrebuje vsakič, ali samo v določenih situacijah? Odgovor določi, kam gre.","why_it_matters":"Preobremenjeni CLAUDE.md upočasni vsako sejo — zaseda kontekst z informacijami, ki so relevantne samo včasih. Skills ohranijo CLAUDE.md jedrnat; specializirano znanje je dostopno, a ne zaseda prostora brez razloga."},{"id":63,"section_id":10,"name":"Skills vs Subagents","icon":"ti-arrows-exchange","badge_type":"when","badge_text":"Razlika vlog","short_desc":"Skill = znanje in navodila za Clauda — Subagent = samostojni agent, ki izvaja naloge","what_it_does":"Skill pove Claudu KAK delati — vsebuje navodila, vzorce, postopke. Subagent je ločeni agent ki TO NAREDI v svojem kontekstnem oknu. Skill je vhod z znanjem, subagent je izvajalec. Kombinacija obojega je najzmogljivejša: subagent s preloadanim skillom dobi specializirano znanje IN ga takoj izvede.","when_to_use":"Skill: ko Claude potrebuje specifično domensko znanje za nalogo — kateri vzorci veljajo za vašo arhitekturo, kateri koraki so obvezni pri deployanju. Subagent: ko hočeš delegirati nalogo ločeni enoti z lastnim kontekstom.","when_not":"Ne zamenjuj njune vloge: skill ne izvaja nalog sam od sebe, subagent ne hrani znanja. Skill brez izvajalca je samo dokument; subagent brez znanja dela na slepo.","why_it_matters":"Razlika med 'vedeti' in 'narediti'. Subagent s preloadanim skillom združi oboje: jasna naloga (subagent) + specifično znanje za opravljanje (skill). To je arhitektura specializiranih agentov v praksi."},{"id":64,"section_id":10,"name":"/skills ukaz","icon":"ti-terminal-2","badge_type":"when","badge_text":"Upravljanje","short_desc":"Vtipkaj /skills v pogovornem polju — prikaže dostopne skille, aktiviraš z /skill ime","what_it_does":"Ukaz /skills prikaže seznam vseh dostopnih skillov — projektnih (.claude/skills/) in uporabniških (~/.claude/skills/). Posamezen skill aktiviraš z /skill ime-skilla. Claude prebere vsebino in jo doda k aktivnemu kontekstu seje. Skill ostane aktiven za čas seje.","when_to_use":"Ko začnjaš nalogo, ki zahteva specifično proceduralno znanje. /skills pokaže, kaj imaš na voljo — tako ne rabiš zapomniti imen vseh skillov.","when_not":"Ne kliči /skills pred vsako nalogo kot ritual. Skills so za specifične situacije — ko znaš, da naloga potrebuje poseben postopek ali standard.","why_it_matters":"Skills so knjižnica v živo. /skills je njen katalog; /skill aktivira točno tisto, kar potrebuješ. Jasen, predvidljiv vmesnik — ne moreš pomotoma naložiti napačnega znanja."},{"id":65,"section_id":10,"name":"Hierarhija skillov","icon":"ti-hierarchy","badge_type":"when","badge_text":"Dva nivoja","short_desc":"Projektni skilli v .claude/skills/ — uporabniški v ~/.claude/skills/ — oba delujeta skupaj","what_it_does":"Projektni skilli živijo v .claude/skills/ v repozitoriju — commitaš jih v version control, cel team jih deli. Uporabniški skilli živijo v ~/.claude/skills/ in so dostopni v vseh tvojih projektih — tam so tvoje osebne procedure in vzorci, ki jih jemlješ od projekta do projekta.","when_to_use":"Projektni: za team-specifično znanje (arhitekturni vzorci tega projekta, deployment postopek, code review standard ekipe). Uporabniški: za znanje ki je tvoje in prenosljivo (moj debugging workflow, moja navodila za commit sporočila).","when_not":"Ne podvajaj skillov med nivojema. Kar je specifično za projekt, gre v projektni skill. Kar je splošno in tvoje, gre v uporabniški. Vsebine ki sta isti ni treba pisati dvakrat.","why_it_matters":"Enako načelo kot pri CLAUDE.md hierarhiji: projektno in osebno delata skupaj. Team dobi konsistentnost, posameznik ohrani osebne preference. Claude kombinira oba nivoja samodejno."},{"id":66,"section_id":10,"name":"Kdaj je Skill pravi tool","icon":"ti-checklist","badge_type":"when","badge_text":"Primeri","short_desc":"Deployment, code review, arhitekturni vzorci, debug workflow — ponavljajoče procedure z jasno obliko","what_it_does":"Najboljši kandidati za skille: deployment checklist (koraki pred in po produkcijskemu deploymentu), code review standard (kaj preveriti pri vsakem PR), arhitekturni vzorec (kako graditi nov modul po team standardih), API integration template, sistematičen debug workflow. Skupni imenovalec: jasno definirana procedura, ki se ponavlja.","when_to_use":"Ko naloga in postopek imata jasno definirano obliko — in se postopek ponavlja. Enkratnih nalog ne pretvarjaj v skille. Procedura, ki jo ponavljaš dvakrat mesečno — nedvomno ja.","when_not":"Ne za kratka, enostavna navodila, ki jih lažje vneseš direktno v prompt. Skill ima smisel ko je navodilo dovolj kompleksno, da ga ne bi pisal vsakič znova. Overhead pisanja skilla se mora povrniti.","why_it_matters":"Skills so institucionalno znanje v obliki, ki jo Claude razume in takoj izvede. Namesto da vsakič razlagaš istih 10 korakov deployanja ali code review standarda, enkrat napišeš skill in ga kličeš ko ga rabiš."},{"id":67,"section_id":10,"name":"Ustvarjanje skilla","icon":"ti-file-plus","badge_type":"rare","badge_text":"Kako začneš","short_desc":"Skill je navadna .md datoteka — napišeš jo sam ali prosiš Clauda, da jo ustvari na podlagi tvojega opisa","what_it_does":"Skill ustvariš kot Markdown datoteko v .claude/skills/ (ime-skilla.md). Vsebina je prosta oblika — zapišeš navodila, postopke, vzorce v Markdown. Alternativno rečeš Claudu: 'Ustvari skill za naš deployment postopek' in Claude napiše datoteko na podlagi tvojega opisa ali obstoječe dokumentacije.","when_to_use":"Ko opaziš, da daješ Claudu ista navodila znova in znova v vsaki seji. Ko subagent potrebuje specializirano znanje za svojo nalogo. Ko hočeš ekipi zagotoviti konsistentno proceduro.","when_not":"Ne začni s skilli takoj ob zagonu projekta. Enako kot pri CLAUDE.md — pusti, da se vzorci pokažejo organsko. Skill ima vrednost, ko je jasno kaj vsebuje in kdaj se kliče.","why_it_matters":"Skill je naložba: enkrat napišeš, večkrat kličeš. Anthropic je Claude Code zasnoval za organsko gradnjo knjižnice znanja — skills so mehanizem za ta dolgoročni spomin. Vsaka dobra procedura je potencialni skill."}],"notes":[{"id":45,"section_id":10,"note_type":"youtube","content":"bjdBVZa66oU","sort_order":-3},{"id":46,"section_id":10,"note_type":"desc","content":"Skills so ena od naprednih funkcij Claude Code, ki ločijo pravo produktivno delo od eksperimentiranja. Ko razumeš razliko med CLAUDE.md (vedno), Skills (na zahtevo) in Subagents (izvajalci), imaš cel sistem za organizacijo znanja in dela — vsaka plast opravlja svojo vlogo.","sort_order":-2},{"id":47,"section_id":10,"note_type":"tip","content":"Skills delajo skupaj s Subagents: dodaj ključ <code>skills</code> v YAML frontmatter subagenta in skill se naloži samodejno ob zagonu — brez da ga moraš posebej klicati med nalogo.","sort_order":-1},{"id":48,"section_id":10,"note_type":"subsection-header","content":"Skills, CLAUDE.md ali Subagents?","sort_order":10},{"id":49,"section_id":10,"note_type":"tip","content":"Hitro pravilo: <strong>CLAUDE.md</strong> = kdo smo in kako delamo (vedno v kontekstu). <strong>Skill</strong> = kako narediti X (na zahtevo). <strong>Subagent</strong> = agent ki X naredi (delegiraj). Vsako na svojem mestu.","sort_order":11}],"questions":[{"id":82,"q":"Kaj je Skill v Claude Code?","options":["Razširitev za IDE","Markdown datoteka z navodili, ki jo Claude naloži na zahtevo","Posebna vrsta subagenta z lastnim kontekstom","Ukaz za namestitev paketov"],"correct":1,"explanation":"Skill je Markdown datoteka z navodili, postopki ali vzorci v .claude/skills/. Claude jo naloži samo ko jo eksplicitno aktiviraš — ne samodejno ob vsaki seji."},{"id":83,"q":"Kaj je ključna razlika med Skill in CLAUDE.md?","options":["Skills so v JSON formatu, CLAUDE.md v Markdown","CLAUDE.md se naloži ob vsaki seji, Skill samo ko ga pokličeš","Skills so samo za napredne razvijalce","Ni razlike — oba delata enako"],"correct":1,"explanation":"CLAUDE.md se samodejno doda k vsakemu promptu ob zagonu seje — vedno v kontekstu. Skill se naloži samo ko ga eksplicitno aktiviraš. To je bistvena razlika za upravljanje kontekstnega prostora."},{"id":84,"q":"Kje shranješ projektne Skille, da jih deli cel team?","options":["V root mapi skupaj z CLAUDE.md","V .claude/skills/ direktoriju (commitaš v version control)","V ~/.claude/skills/ (osebna mapa)","V /usr/local/lib/claude/"],"correct":1,"explanation":"Projektni skilli živijo v .claude/skills/ in se commitajo v repozitorij — cel team jih deli. Uporabniški skilli gredo v ~/.claude/skills/ in so samo tvoji."},{"id":85,"q":"Kdaj je Skill boljša izbira kot CLAUDE.md?","options":["Vedno — Skills so novejša in boljša funkcija","Ko gre za proceduralno znanje ki ga Claude ne potrebuje vsakič, ampak samo v določenih situacijah","Ko projekt nima CLAUDE.md datoteke","Ko delaš v Plan Mode"],"correct":1,"explanation":"CLAUDE.md je za znanje ki ga Claude vedno potrebuje. Skill je za proceduralno znanje z določenim obsegom — deployment, code review, vzorci — ki ga kličeš samo ko je relevantno."},{"id":86,"q":"Kakšna je razlika med Skill in Subagent?","options":["Skill izvaja naloge, Subagent hrani znanje","Skill = znanje/navodila za Clauda, Subagent = ločeni agent ki izvaja naloge","Sta sinonima — isto orodje z drugačnim imenom","Skill je starejša verzija Subagenta"],"correct":1,"explanation":"Skill pove Claudu KAK delati — vsebuje navodila in vzorce. Subagent je ločeni agent ki TO NAREDI v svojem kontekstnem oknu. Skill je vhod z znanjem, subagent je izvajalec."},{"id":87,"q":"Kako aktiviraš specifičen Skill med sejo?","options":["Z ukazom /skill ime-skilla ali referenco v promptu","Z restartem Claude Code","Samodejno se aktivira ob vsaki seji","Prek Edit > Skills v meniju IDE"],"correct":0,"explanation":"/skill ime-skilla aktivira skill in naloži njegovo vsebino v aktiven kontekst. /skills (množina) prikaže seznam vseh dostopnih skillov."},{"id":88,"q":"Kdaj je pravi čas za ustvariti Skill?","options":["Takoj ob začetku projekta, preventivno","Ko opaziš, da vsakič daješ Claudu ista navodila — vzorec se je pokazal","Samo ko ti to naroči vodja ekipe","Ko imaš vsaj 100 datotek v projektu"],"correct":1,"explanation":"Enako načelo kot pri CLAUDE.md: začni brez skillov in jih dodajaj ko vidimo ponavljajoče vzorce. Skill ima smisel ko se ista procedura pojavi večkrat."},{"id":89,"q":"Kako Skills delajo skupaj s Subagenti?","options":["Skills nadomestijo subagente","Skill dodaš v YAML frontmatter subagenta — naloži se samodejno ob zagonu, subagent takoj dobi specializirano znanje","Subagent kliče skill samo v Plan Mode","Med njima ni povezave"],"correct":1,"explanation":"Skill dodaš v YAML frontmatter subagenta prek ključa skills. Ko se subagent zažene, se skill naloži v celoti samodejno — subagent takoj deluje s polnim specializiranim znanjem."}]},{"id":11,"lesson":"Lekcija 4","title":"MCP: Povezi Claude Code z zunanjim svetom","features":[{"id":68,"section_id":11,"name":"Model Context Protocol","icon":"ti-plug-connected","badge_type":"when","badge_text":"Odprti standard","short_desc":"Odprti standard, ki Claude Code poveže z zunanjimi orodji in podatki — tvoj ekosistem dostopen Claudu","what_it_does":"MCP (Model Context Protocol) je odprti standard, ki Claude Code omogoča dostop do zunanjih orodij in podatkovnih virov. Namesto da Claude dela samo z lokalnimi datotekami, dobi dostop do projektnih orodij (Linear, Jira), dokumentacijskih baz, API-jev, baz podatkov — česarkoli kar ima MCP strežnik.","when_to_use":"Ko velik del tvojega konteksta živi zunaj kode — v projektnih orodjih, dokumentacijah, oblačnih podatkih. MCP prinaša ta kontekst neposredno v Claudovo delovno okolje.","when_not":"Ne za vsak zunanji servis brez premisleka. Vsak aktiven MCP strežnik zasede prostor v kontekstu — dodaj samo tiste, ki jih aktivno potrebuješ za ta projekt.","why_it_matters":"Večina resničnega dela se ne dogaja samo v kodi — dogaja se v kombinaciji kode, nalog, dokumentacije in podatkov. MCP je most med Claudom in tem ekosistemom, ki je bil prej nedostopen."},{"id":69,"section_id":11,"name":"HTTP vs Stdio strežniki","icon":"ti-server","badge_type":"when","badge_text":"Dve vrsti","short_desc":"HTTP = oddaljeni servis pri ponudniku, Stdio = lokalni proces na tvojem računalniku","what_it_does":"HTTP MCP strežniki so oddaljeni — hostirani pri ponudniku servisa, komunicirajo prek omrežja. Primeri: Slack MCP, GitHub MCP, Notion MCP. Stdio MCP strežniki so lokalni procesi na tvojem računalniku. Primeri: lokalna baza podatkov, interni tool podjetja, skript za dostop do internih sistemov.","when_to_use":"HTTP za javne servise z uradnim MCP strežnikom (Linear, Notion, Slack, GitHub). Stdio za lokalna orodja ali ko potrebuješ predelati podatke preden jih pokažeš Claudu.","when_not":"HTTP strežniki zahtevajo omrežno povezavo — v offline scenarijih niso na voljo. Stdio strežniki zahtevajo lokalno konfiguracijo in zagon procesa — malo več nastavitev na začetku.","why_it_matters":"Razumevanje tipov pomaga pri troubleshootingu: je strežnik nedostopen? Preveri omrežje za HTTP ali lokalni proces za Stdio. Tip pove, kje iskati težavo."},{"id":70,"section_id":11,"name":"claude mcp add","icon":"ti-terminal-2","badge_type":"when","badge_text":"Kako dodaš","short_desc":"Ukaz v terminalu zunaj seje — Claude te vodi skozi nastavitev novega MCP strežnika","what_it_does":"MCP strežnik dodaš z ukazom <code>claude mcp add</code> v terminalu zunaj Claude Code seje. Claude te vodi skozi postopek: ime strežnika, tip (HTTP ali Stdio), URL ali ukaz, obseg (Local/User/Project). Ko je strežnik dodan, je na voljo ob naslednjem zagonu seje.","when_to_use":"Ko hočeš Claudu dati dostop do novega zunanjega servisa ali podatkovnega vira. Enkratna nastavitev — potem je strežnik vedno na voljo glede na izbrani obseg.","when_not":"Ne za strežnike ki jih rabiš samo enkrat za eksperiment. Dodaj samo trajne integracije, ki prinašajo redno vrednost — vsak strežnik ima kontekstno ceno.","why_it_matters":"<code>claude mcp add</code> je enostavna vstopna točka brez ročnega urejanja konfiguracijskih datotek. En ukaz, en vodeni postopek, strežnik je dodan. Nič skritega."},{"id":71,"section_id":11,"name":"/mcp ukaz","icon":"ti-adjustments-horizontal","badge_type":"when","badge_text":"Med sejo","short_desc":"Vtipkaj /mcp med sejo — prikaže vse strežnike, stanje in možnost začasnega izklopa","what_it_does":"Ukaz /mcp med sejo prikaže vse konfigurirane MCP strežnike: kateri so povezani, kateri niso, kateri imajo napako. Odtod jih začasno izklopiš za trenutno sejo brez brisanja permanentne konfiguracije. Vgrajeni strežniki (claude-in-chrome, plugin-context) so vedno vidni.","when_to_use":"Ko hočeš preveriti kateri strežniki so aktivni, ali ko hočeš začasno izklopiti strežnik ki ga za to sejo ne potrebuješ — in s tem sprostiti kontekstni prostor za nalogo.","when_not":"Ne za permanentno brisanje strežnikov — to narediš zunaj seje z <code>claude mcp remove</code>. /mcp je za sprotno upravljanje, ne konfiguracijo.","why_it_matters":"/mcp je tvoja kontrolna plošča za MCP med delom. Jasna slika tega, kaj je aktivno, ti da nadzor nad kontekstnim prostorom brez iskanja konfiguracijskih datotek."},{"id":72,"section_id":11,"name":"Scopanje strežnikov","icon":"ti-git-branch","badge_type":"when","badge_text":"Trije nivoji","short_desc":"Local = samo tvoj projekt, User = vsi tvoji projekti, Project = cel team prek .mcp.json","what_it_does":"Obseg MCP strežnika določiš ob dodajanju: Local — dostopen samo v trenutnem projektu, samo zate. User — dostopen v vseh tvojih projektih (shranjen v ~/.claude/). Project — dostopen vsem v teamu; commitaš .mcp.json v repozitorij in ekipa dobi enake strežnike samodejno ob kloniranju.","when_to_use":"Local: za testiranje novega strežnika. User: za osebne integracije ki jih jemlješ od projekta do projekta. Project: za ekipne integracije — vsi morajo imeti enak dostop do istih orodij.","when_not":"Ne dajaj vsega na User nivo — hitro postane nepregledno. Razmisli: je ta integracija za ta projekt ali za vse moje projekte? Za eksperimente vedno Local.","why_it_matters":"Project scope s .mcp.json je ekipni mehanizem: enkrat dodaš strežnik in cel team ga dobi samodejno ob clonanju repozitorija. Nič ročnega nastavljanja za vsakega člana."},{"id":73,"section_id":11,"name":"Kontekstni stroški MCP","icon":"ti-battery-charging","badge_type":"caution","badge_text":"Pazi","short_desc":"Vsak aktiven strežnik naloži definicije orodij v kontekst — 5 strežnikov × 20 orodij = precejšen prostor","what_it_does":"Claude naloži definicije orodij vsakega aktivnega MCP strežnika samodejno — preden sploh začneš delati. Pet strežnikov z dvajsetimi orodji vsak zasede precejšen del kontekstnega okna. Ukaz /mcp ti pokaže kaj je aktivno — izklopiti kar ne potrebuješ za to sejo.","when_to_use":"/mcp preveri pred začetkom obsežne seje: kateri strežniki so aktivni, izklopiti neuporabljene. Posebno važno pri nalogah, ki zahtevajo dolg kontekst (analiza velike kode baze, kompleksne refaktoracije).","when_not":"Ne izklopiti strežnikov, ki jih aktivno potrebuješ za nalogo. Cilj je odstraniti NEPOTREBNE — ne vse MCP strežnike. Ravnovesje med dostopnostjo in kontekstno ekonomijo.","why_it_matters":"Ko Claude-ovi MCP orodji presežejo 10% kontekstnega okna, Claude Code preklopi na auto-discovery (išče orodja on-demand) — a to morda ne deluje vedno zanesljivo. Bolje preventivno upravljati obseg."},{"id":74,"section_id":11,"name":"Skills kot alternativa MCP","icon":"ti-replace","badge_type":"when","badge_text":"Kontekstna alternativa","short_desc":"Ko imaš CLI ekvivalent, je Skill + terminal kontekstno varčnejša alternativa MCP strežniku","what_it_does":"Nekateri MCP strežniki imajo CLI ekvivalent: gh za GitHub, aws za AWS, kubectl za Kubernetes. CLI je kontekstno varčnejši — ne doda persistentnih definicij orodij v kontekst. Napiši Skill z navodili za specifično nalogo in Claude jo izvede prek terminala namesto MCP.","when_to_use":"Ko je naloga dobro definirana in ima dober CLI tool: deployment na AWS, GitHub operacije (PR, issue, review), database queries. Skill + terminal pogosto doseže enak rezultat brez kontekstnih stroškov MCP.","when_not":"Ne za kompleksne integracije, ki zahtevajo real-time dvosmerni dostop ali zahtevno procesiranje podatkov na strani servisa. Tam MCP nima enakovredne alternative.","why_it_matters":"Kontekstna ekonomija je stalna tema pri Claude Code. MCP je zmogljiv, a ima ceno. Skill + CLI je pragmatična alternativa za enokontaktne operacije — jasna procedura brez trajnega zasedanja kontekstnega prostora."}],"notes":[{"id":50,"section_id":11,"note_type":"youtube","content":"kkBFmwkDzdo","sort_order":-3},{"id":51,"section_id":11,"note_type":"desc","content":"MCP (Model Context Protocol) je odprti standard, ki Claude Code poveže z zunanjimi orodji in podatkovnimi viri. Ko velik del tvojega konteksta živi zunaj kode — v projektnih orodjih, bazah podatkov, dokumentacijah — MCP prinaša ta kontekst neposredno v Claudovo delovno okolje.","sort_order":-2},{"id":52,"section_id":11,"note_type":"tip","content":"Vgrajeni MCP strežniki so vedno dostopni brez konfiguracije: <code>claude-in-chrome</code> (brskalni agent) in <code>plugin-context</code> (kontekst iz IDE). Ostale dodaš z <code>claude mcp add</code>.","sort_order":-1},{"id":53,"section_id":11,"note_type":"subsection-header","content":"Scopanje in kontekstni stroški","sort_order":10},{"id":54,"section_id":11,"note_type":"warning","content":"MCP strežniki dodajo definicije orodij v kontekst — tudi ko jih ne uporabljate aktivno. Redno preverjaj z /mcp in izklopiti strežnike, ki jih za ta projekt ne potrebuješ. Manj aktivnih strežnikov = več prostora za dejansko delo.","sort_order":11}],"questions":[{"id":90,"q":"Kaj je MCP (Model Context Protocol)?","options":["Nova verzija Claude Code","Odprti standard za povezavo Claude Code z zunanjimi orodji in podatkovnimi viri","Metoda za optimizacijo kontekstnega okna","Format za pisanje CLAUDE.md"],"correct":1,"explanation":"MCP je odprti standard ki Claude Code omogoča dostop do zunanjih orodij in podatkov — projektnih orodij, baz podatkov, dokumentacij. Claude ni več omejen samo na lokalne datoteke."},{"id":91,"q":"Kateri dve vrsti MCP strežnikov obstajata?","options":["Javni in zasebni","HTTP (oddaljeni pri ponudniku) in Stdio (lokalni procesi)","Brezplačni in plačljivi","Hitri in počasni"],"correct":1,"explanation":"HTTP strežniki so oddaljeni — hostirani pri ponudniku servisa, komunicirajo prek omrežja. Stdio strežniki so lokalni procesi na tvojem računalniku."},{"id":92,"q":"Kako dodaš MCP strežnik v Claude Code?","options":["Z ročnim urejanjem ~/.claude/config.json","Z ukazom claude mcp add v terminalu (zunaj seje)","Prek nastavitev v VS Code razširitvi","Samodejno se doda ob prvem zagonu"],"correct":1,"explanation":"claude mcp add je ukaz v terminalu zunaj seje, ki te vodi skozi nastavitev: ime, tip, URL/ukaz, obseg. Enkratna nastavitev."},{"id":93,"q":"Kaj naredi ukaz /mcp med sejo?","options":["Doda novi MCP strežnik","Prikaže vse konfigurirane strežnike, stanje in možnost začasnega izklopa","Briše vse MCP strežnike","Prenese novo verzijo Claude Code"],"correct":1,"explanation":"/mcp je kontrolna plošča za MCP med delom — vidiš kateri so aktivni, kateri imajo napako, in jih začasno izklopiš za trenutno sejo."},{"id":94,"q":"Kateri scope omogoča deljenje MCP strežnikov z ekipo?","options":["Local scope","User scope","Project scope prek .mcp.json v repozitoriju","Global scope"],"correct":2,"explanation":"Project scope zahteva .mcp.json datoteko, ki jo commitaš v repozitorij. Ob kloniranju ekipa dobijo enake MCP strežnike samodejno."},{"id":95,"q":"Zakaj je treba izklopiti neuporabljene MCP strežnike?","options":["Ker so nevarni za varnost","Ker upočasnijo internet","Ker vsak aktiven strežnik naloži definicije orodij v kontekst brez koristi za nalogo","Ker zasedejo prostor na disku"],"correct":2,"explanation":"Claude naloži definicije orodij vsakega aktivnega MCP strežnika samodejno — tudi tistih ki jih ne folosiš. To zasede dragoceni kontekstni prostor brez koristi."},{"id":96,"q":"Kaj pomeni Local scope pri MCP strežniku?","options":["Strežnik ki teče na lokalnem računalniku (Stdio)","MCP strežnik dostopen samo v trenutnem projektu, samo tebi","Strežnik brez dostopa do interneta","Strežnik ki deluje samo v terminalu"],"correct":1,"explanation":"Local scope = strežnik je dostopen samo v tem projektu, samo zate. Ni v version controlu. Dobro za testiranje pred trajno dodajo."},{"id":97,"q":"Kdaj je Skill + CLI boljša alternativa MCP strežniku?","options":["Vedno — Skill je vedno boljši","Ko ima naloga dober CLI ekvivalent — Skill + terminal brez trajnih kontekstnih stroškov MCP","Ko MCP strežnik ni na voljo","Ko delaš v Plan Mode"],"correct":1,"explanation":"Nekatere MCP integracije imajo CLI ekvivalent (gh, aws, kubectl). Skill + CLI je kontekstno varčnejši — ne dodaja persistentnih definicij orodij v kontekst. Za enokontaktne operacije pragmatična alternativa."}]},{"id":12,"lesson":"Lekcija 5","title":"Hooks: Deterministična kontrola nad Claude Code","features":[{"id":75,"section_id":12,"name":"Hooks","icon":"ti-hook","badge_type":"when","badge_text":"Deterministično","short_desc":"Ukazi, ki se zaženejo ob točno določenih točkah Claude Code lifecycle-a — vsakič, brez izjeme","what_it_does":"Hooks ti omogočijo namestiti ukaze na specifičnih točkah Claude Code lifecycle-a: pred klicem orodja, po klicu, ob vnosu prompta, ob zaključku. Ključna lastnost: hooks so deterministični — vedno se zaženejo, brez izjeme. Claude v CLAUDE.md morda bo formatiral datoteko — hook zagotovi, da se to zgodi absolutno vsakič.","when_to_use":"Ko hočeš zagotoviti, da se določena stvar zgodi VEDNO — ne samo ko Claude presodi, da je primerno. Auto-formatting, varnostni pregledi pred akcijami, logging, obvestila ob zaključku — vse kar zahteva zanesljivo izvajanje.","when_not":"Ne za prilagodljiva vedenja, ki se morajo odzvati na kontekst. Hook je za togo, deterministično logiko — 'vsakič, brez razmišljanja'. Za priporočila in soft suggestions so CLAUDE.md navodila bolj primerna.","why_it_matters":"Ključna razlika je beseda 'vsakič'. Claude je inteligenten in prilagodljiv — a včasih rabiš garancijo, ne sugestijo. Za varnostne pravila in konsistentno formatiranje je hook ta garancija."},{"id":76,"section_id":12,"name":"PreToolUse","icon":"ti-player-stop","badge_type":"caution","badge_text":"Pred akcijo","short_desc":"Teče PRED vsakim klicem orodja — lahko blokira akcijo preden se zgodi","what_it_does":"PreToolUse hook se izvede preden Claude pokliče katero koli orodje (branje datoteke, pisanje, terminalni ukaz). Prejme ime orodja in vhod kot JSON na stdin. Z exit kodo nadziraš vedenje: exit 0 = nadaljuj normalno, exit 2 = blokiraj akcijo (tvoje sporočilo na stderr gre Claudu kot feedback), katerakoli druga koda = neblokirajoča napaka, vidna samo tebi.","when_to_use":"Za uveljavljanje trdih varnostnih pravil: blokiraj pisanje v produkcijsko konfiguracijo, blokiraj bash z rm -rf, blokiraj commite neposredno na main branch. Vse, kar mora biti PREPREČENO — ne samo odsvetovano.","when_not":"Ne za priporočila ali mehka opozorila — za to so CLAUDE.md navodila dovolj. PreToolUse je za hard blocks, ki se morajo uveljavljati brez izjeme.","why_it_matters":"Exit koda 2 z jasnim sporočilom vrne feedback Claudu — Claude ve zakaj je bil ustavljen in predlaga alternativo. To je varnostni mehanizem z inteligentnim odzivom, ne slepa blokada ki povzroča zmedeno ponavljanje."},{"id":77,"section_id":12,"name":"PostToolUse","icon":"ti-player-play","badge_type":"when","badge_text":"Po akciji","short_desc":"Teče TAKOJ po klicu orodja — najpogostejša uporaba: auto-formatting in logging","what_it_does":"PostToolUse hook se izvede takoj ko orodje zaključi. Nastavi matcher na 'Edit|Write' — hook se sproži vsakič ko Claude uredi ali napiše datoteko. Ukaz preveri ekstenzijo in požene pravi formatter: Prettier za TypeScript, gofmt za Go, black za Python. En hook, konsistentno formatiranje za cel projekt.","when_to_use":"Auto-formatting po vsakem urejanju datoteke, logging vseh izvedenih ukazov za audit trail, sprožanje specifičnih testov po spremembi kritičnih datotek, pošiljanje obvestil ekipi ob določenih akcijah.","when_not":"Pazi na performance: PostToolUse hook, ki teče po vsakem branju datoteke, bo bistveno upočasnil delo. Vedno nastavi matcher, da se sproži samo za relevantna orodja (Edit|Write, ne vsa).","why_it_matters":"Najcenejši način za konsistentno formatiranje pri celemu timu: namesto da Claudu razlagaš 'vedno formatiraj po urejanju', to garantiraš z enim hook-om v repozitoriju. Enkrat nastavljeno, vsakič izvršeno, za vsakogar."},{"id":78,"section_id":12,"name":"UserPromptSubmit","icon":"ti-send","badge_type":"when","badge_text":"Ob promptu","short_desc":"Teče ob vnosu prompta, preden Claude začne procesirati — priložnost za obogatitev ali pregled","what_it_does":"UserPromptSubmit hook se izvede ob vnosu prompta, preden Claude začne procesirati. Prejme vsebino prompta. Primeri: samodejno dodaj kontekst vsakemu promptu (datum, ime trenutnega branch-a, ime projekta), preveri ali prompt vsebuje občutljive podatke pred pošiljanjem, logiraj vse prompte za analizo.","when_to_use":"Ko hočeš sistematično obogatiti vsak prompt s kontekstom, ki ga Claude vsakič potrebuje — brez da ga ročno dodajate. Ali za revizijsko sled vseh promptov v organizacijskem okolju.","when_not":"Ne za spremembe, ki jih mora Claude interpretirati drugače glede na situacijo — tam je boljši sistem promptov v CLAUDE.md ali samem promptu. Hook je za deterministično, ne kontekstualno obogatitev.","why_it_matters":"Vsak prompt gre skozi UserPromptSubmit hook — to je priložnost za sistematično dodajanje metapodatkov ali pregled. En hook, ki dvigne kakovost vsakega prompta brez nobenega ročnega dela."},{"id":79,"section_id":12,"name":"Stop & Notification","icon":"ti-bell","badge_type":"when","badge_text":"Po zaključku","short_desc":"Stop teče ko Claude konča — Notification ko Claude pošlje obvestilo; idealno za lastna obvestila","what_it_does":"Stop hook se izvede ko Claude zaključi z odgovarjanjem. Idealno za pošiljanje obvestil (e-mail, Slack sporočilo, sistemski zvok) ko dolga naloga konča. Notification hook se izvede ko Claude sam pošlje obvestilo — tu ga prestrežeš in obdelaš po svoje (drug kanal, drug format, dodaten logging).","when_to_use":"Stop: ko začnjaš dolge naloge, ki trajajo minute ali dlje, in hočeš biti obveščen ko so končane — brez čakanja pri terminalu. Notification: ko hočeš prilagoditi format ali kanal Claude-ovih obvestil.","when_not":"Ne za kratke, hitre naloge — obvestilo ob 3-sekundnem odgovoru je nepotrebno. Stop hook je za naloge, kjer bi sicer čakal brez dela.","why_it_matters":"Claude Code zna delati v ozadju na dolgotrajnih nalogah. Stop hook te osvobodi od čakanja — naredi kaj drugega, pride obvestilo, vrneš se ko je čas."},{"id":80,"section_id":12,"name":"Blokiranje z exit kodo","icon":"ti-circle-x","badge_type":"when","badge_text":"Trije odzivi","short_desc":"Exit 0 = nadaljuj, Exit 2 = blokiraj in pojasni Claudu, katera koli druga koda = napaka samo za tebe","what_it_does":"PreToolUse hooks nadzorujejo Claude z exit kodami: Exit 0 = normalno nadaljuj. Exit 2 = blokiraj akcijo; stderr sporočilo gre Claudu kot feedback, ki razume zakaj in se prilagodi. Katera koli druga exit koda = neblokirajoča napaka, vidna samo tebi — Claude ne ve zanjo in nadaljuje.","when_to_use":"Exit 2 z jasnim sporočilom: ko hočeš Claudu povedati zakaj je bila akcija blokirana in mu dati smer za alternativo. Npr: 'Pisanje v produkcijski direktorij je blokirano. Uporabi staging okolje ali dodaj spremembo v PR.'","when_not":"Ne za pusto blokiranje brez razlage — Claude bo brez feedbacka poskusil znova na drugačen način, kar lahko povzroči zmedeno izvajanje. Vedno dodaj smiselno sporočilo z exit 2.","why_it_matters":"Exit 2 je eleganten mehanizem: ne samo prepreči akcijo, ampak Claudu pove zakaj. Claude se prilagodi in predlaga alternativo — namesto da se ponavlja v krogu. Varnost z razumevanjem, ne slepa blokada."},{"id":81,"section_id":12,"name":"Deljenje hooks z ekipo","icon":"ti-users","badge_type":"when","badge_text":"Ekipni hooks","short_desc":"Hooks v .claude/settings.json gredo v version control — cel team dobi enake varnostne pravice in auto-formatiranje","what_it_does":"Hooks konfigurirani v .claude/settings.json so project-level in jih commitaš v repozitorij — cel team dobi enake hooks samodejno ob kloniranju. Uporabi okoljsko spremenljivko CLAUDE_PROJECT_DIR v ukazih, da se skripte najdejo ne glede na to, kje ima kdo klon repozitorija.","when_to_use":"Za varnostne hooks (blokiraj produkcijske operacije), formatiranje (Prettier/gofmt za cel team), audit logging vseh Claude Code akcij — vse kar mora biti konsistentno pri vsakem članu ekipe.","when_not":"Osebni hooks (tvoje obvestilo na Slack, tvoj terminal zvok ob zaključku) gredo v ~/.claude/settings.json — ne v repozitorij. Ločuj ekipne (varnost, formatiranje) od osebnih (preference) hooks.","why_it_matters":"Deljeni hooks zagotovijo, da varnostna pravila niso samo priporočila v CLAUDE.md — so uveljavljeni pri vsakem članu ekipe, v vsaki seji, avtomatično. En merge request za varnostni hook ščiti cel team."}],"notes":[{"id":55,"section_id":12,"note_type":"youtube","content":"IkaPHiMDazM","sort_order":-3},{"id":56,"section_id":12,"note_type":"desc","content":"Hooks so zadnji nivo prilagajanja Claude Code. Medtem ko CLAUDE.md, Skills, Subagents in MCP razširjajo Claudovo znanje in zmogljivosti, Hooks dodajo deterministično logiko — ukaze, ki se zaženejo vsakič, brez izjeme. Auto-formatting, varnostni pregledi, obvestila ob zaključku.","sort_order":-2},{"id":57,"section_id":12,"note_type":"tip","content":"Hooks konfiguriraj z ukazom <code>/hooks</code> v Claude Code, ali z direktnim urejanjem <code>~/.claude/settings.json</code> za osebne hooks in <code>.claude/settings.json</code> za ekipne hooks v repozitoriju.","sort_order":-1},{"id":58,"section_id":12,"note_type":"subsection-header","content":"Praktični primer: auto-formatting","sort_order":10},{"id":59,"section_id":12,"note_type":"desc","content":"Nastavi PostToolUse hook z matcherjem <code>'Edit|Write'</code>. Ukaz preveri ekstenzijo datoteke in požene pravi formatter — Prettier za TypeScript, gofmt za Go, black za Python. Enostavna nastavitev enkrat v .claude/settings.json: konsistentno formatiranje pri vsakem urejanju, za cel team, brez da bi se na to sploh morali spomniti.","sort_order":11},{"id":60,"section_id":12,"note_type":"warning","content":"PreToolUse hooks z exit kodo 2 BLOKIRAJO akcijo. Preden jih aktiviraš na produkcijskem projektu, testiraj na testnem okolju. Napačna konfiguracija blokira legitimne operacije — in to je težje opaziti kot pričakovati.","sort_order":12}],"questions":[{"id":98,"q":"Kaj je ključna lastnost Hooks, ki jih loči od CLAUDE.md navodil?","options":["So hitrejši od CLAUDE.md","So deterministični — vsakič se zaženejo brez izjeme","Delajo samo v terminalu","Podpirajo samo Python ukaze"],"correct":1,"explanation":"Hooks so deterministični — vedno se zaženejo, brez izjeme. Claude z navodilom v CLAUDE.md 'bo poskušal' narediti X. Hook garantira da se zgodi absolutno vsakič."},{"id":99,"q":"Kdaj se sproži PreToolUse hook?","options":["Ob zagonu Claude Code","Ko vneseš prompt","PRED vsakim klicem orodja — preden Claude izvede akcijo","Ko Claude zaključi z odgovarjanjem"],"correct":2,"explanation":"PreToolUse se izvede preden Claude pokliče katero koli orodje — pred branjem datoteke, pisanjem, terminalskim ukazom. Priložnost za blokiranje preden se akcija zgodi."},{"id":100,"q":"Kateri hook je najboljši za auto-formatting po urejanju datotek?","options":["PreToolUse","UserPromptSubmit","PostToolUse z matcherjem 'Edit|Write'","Stop"],"correct":2,"explanation":"PostToolUse se izvede takoj ko orodje zaključi. Matcher 'Edit|Write' zagotovi, da se hook sproži samo ob urejanju datotek — ne pri vsakem klicu orodja."},{"id":101,"q":"Kaj pomeni exit koda 2 v PreToolUse hooku?","options":["Hook je bil uspešen","Hook je imel interno napako","Blokiraj akcijo in pošlji stderr sporočilo Claudu kot feedback","Nadaljuj normalno"],"correct":2,"explanation":"Exit 2 = blokiraj akcijo + stderr sporočilo gre Claudu kot feedback. Claude ve zakaj je bil ustavljen in se prilagodi. Exit 0 = normalno, katera koli druga koda = neblokirajoča napaka vidna samo tebi."},{"id":102,"q":"Kdaj se sproži Stop hook?","options":["Ko stopiš Claude Code","Ko Claude zaključi z odgovarjanjem — odlično za obvestila po dolgih nalogah","Ko blokiraš akcijo z exit 2","Ob vsakem vnosu prompta"],"correct":1,"explanation":"Stop hook se izvede ko Claude zaključi z odgovarjanjem. Idealno za pošiljanje obvestil (Slack, e-mail, zvok) ko dolga naloga konča — osvobodi te od čakanja pri terminalu."},{"id":103,"q":"Kje shranješ hooks za deljenje z ekipo?","options":["V CLAUDE.md datoteki","V ~/.claude/settings.json (samo zate)","V .claude/settings.json v repozitoriju (commitaš v version control)","Prek /skills ukaza"],"correct":2,"explanation":"Ekipni hooks gredo v .claude/settings.json v repozitoriju — cel team dobi enake hooks ob kloniranju. Osebni hooks gredo v ~/.claude/settings.json in so samo tvoji."},{"id":104,"q":"Zakaj je smiselno dodati sporočilo ob exit kodi 2 v PreToolUse hooku?","options":["Ker je to obvezno po specifikaciji","Claude dobi feedback — razume zakaj je bil ustavljen in predlaga alternativo namesto ponavljanja","Sporočilo se zapiše v log datoteko","Samo za lažji debugging hooka"],"correct":1,"explanation":"Sporočilo ob exit 2 gre Claudu kot feedback — razume zakaj je bil ustavljen in predlaga alternativo. Brez sporočila Claude ne ve zakaj in bo morda poskusil znova na drugačen način."},{"id":105,"q":"Kateri hook se izvede ob vnosu prompta, preden Claude začne procesirati?","options":["PreToolUse","PostToolUse","UserPromptSubmit","Stop"],"correct":2,"explanation":"UserPromptSubmit se izvede ob vnosu prompta, preden Claude začne procesirati. Primeri: samodejno dodaj kontekst (datum, branch), preveri občutljive podatke, logiraj prompte."},{"id":106,"q":"Zakaj je deljenje Hooks z ekipo prek version controla ključno?","options":["Ker hooks drugače ne delajo","Ker varnostna pravila postanejo uveljavljana pri vseh članih — ne samo priporočena v CLAUDE.md","Ker je to zahteva Anthropic","Samo iz organizacijskih razlogov"],"correct":1,"explanation":"Hooks v repozitoriju zagotovijo, da varnostna pravila, formatiranje in logging veljajo za vsakega člana ekipe, v vsaki seji. En merge request ščiti cel team — brez ročnega nastavljanja pri vsakomur."}]}]},{"id":5,"title":"Certification Prep","objectives":["Imeti vse ključne ukaze in koncepte na enem mestu za hitro ponovitev pred izpitom","Razumeti kritične razlike med podobnimi koncepti ki se pogosto zamenjujejo","Prepoznati najpogostejše pasti in napačne odgovore na certifikatskem izpitu","Zaključiti tečaj z zanesljivim, celostnim razumevanjem Claude Code"],"reflections":["Kakšna je ključna razlika med /compact in /clear?|/compact stisne pogovor a ohrani spomin — nadaljuješ isto nalogo. /clear izbriše vse brez sledi — svež start za novo nalogo. Napačna izbira je nepovratna: /compact je varna, /clear je definitvna.","Kaj je edina stvar ki je NIKOLI ne smeš shraniti v CLAUDE.md?|API ključe, gesla in vse občutljive podatke. CLAUDE.md je navadna besedilna datoteka commitana v version control — vidna vsem ki imajo dostop do repozitorija.","Katera exit koda v PreToolUse hooku blokira akcijo in pošlje feedback Claudu?|Exit koda 2. Exit 0 = nadaljuj normalno. Exit 2 = blokiraj akcijo + stderr sporočilo gre Claudu kot razlaga. Katera koli druga koda = napaka vidna samo tebi, Claude ne ve zanjo."],"sections":[{"id":13,"lesson":"Lekcija 1","title":"Quick Reference: Vse na enem mestu","features":[{"id":82,"section_id":13,"name":"Ukazi v seji","icon":"ti-terminal-2","badge_type":"when","badge_text":"Referenca","short_desc":"Vsi ključni /ukazi — vtipkaj direktno v pogovorno polje med sejo","what_it_does":"<strong>/context</strong> — vizualni pregled porabe kontekstnega okna po kategorijah.<br><strong>/compact</strong> — ročna kompakcija, ohrani spomin na potek dela.<br><strong>/clear</strong> — popolna ponastavitev brez spomina.<br><strong>/agents</strong> — ustvari ali upravljaj subagente.<br><strong>/skills</strong> — seznam skillov; <strong>/skill ime</strong> aktivira ga.<br><strong>/hooks</strong> — konfiguracija hooks med sejo.<br><strong>/mcp</strong> — stanje MCP strežnikov, začasni izklop.","when_to_use":"Na začetku obsežne seje: /context (diagnostika prostora), /mcp (izklopiti neuporabljene strežnike). Med nalogo: /compact ko se bližaš limitu. Ob prehodu na novo nalogo: /clear.","when_not":"Ne /clear ko hočeš samo stisniti kontekst — to izgubi vse. Ne /compact pred novo, nepovezano nalogo — star kontekst bo vnašal pristranskost.","why_it_matters":"Poznavanje ukazov ni zapomnitev sintakse — je razumevanje kdaj kateri pomaga. Razlika /compact vs /clear je ena najpogostejših tem na certifikatskem izpitu."},{"id":83,"section_id":13,"name":"Načini dela","icon":"ti-sliders","badge_type":"when","badge_text":"Trije načini","short_desc":"Approval (privzeto) → Auto-accept → Plan Mode — SHIFT+TAB cikla med njimi v terminalu","what_it_does":"<strong>Approval Mode</strong> (privzeto): dovoljenje pred vsako datoteko in ukazom — polni nadzor.<br><strong>Auto-accept Mode</strong>: datoteke ureja samodejno; terminalni ukazi (npm, git, rm…) še vedno zahtevajo potrditev.<br><strong>Plan Mode</strong>: samo bere in planira, nobenih sprememb dokler ne odobriš načrta.<br><strong>SHIFT+TAB</strong> v terminalu cikla med vsemi tremi brez ponovnega zagona.","when_to_use":"Approval: vedno privzeto, posebej na novem projektu ali kritičnih sistemih. Auto-accept: rutinska opravila na testnem okolju. Plan Mode: pred vsako večjo ali tvegano spremembo.","when_not":"Auto-accept ne na produkcijskem sistemu — napako je težje ujeti. Plan Mode ne za trivialne enodatotečne spremembe.","why_it_matters":"Kritična past izpita: Auto-accept Mode še VEDNO zahteva potrditev za terminalne ukaze — samo datoteke so samodejne. To je pogosta napačna predpostavka pri testnih vprašanjih."},{"id":84,"section_id":13,"name":"Context management","icon":"ti-arrows-minimize","badge_type":"when","badge_text":"Tri orodja","short_desc":"/context (diagnostika) → /compact (stisni, ohrani) → /clear (ponastavi vse) — vsako za svojo situacijo","what_it_does":"<strong>/context</strong>: vizualni pregled porabe po kategorijah (pogovor, datoteke, orodja) — diagnostično.<br><strong>/compact</strong>: ročno stisne pogovor, ohrani spomin na potek, odstrani vmesne podrobnosti.<br><strong>/clear</strong>: izbriše VSE — Claude začne brez nobenega spomina.<br><strong>Samodejni compaction</strong>: aktivira se ko se okno napolni, del konteksta se vedno izgubi.","when_to_use":"/context: ko se seja upočasni. /compact: nadaljevanje iste naloge blizu limita. /clear: prehod na novo, nepovezano nalogo. Pred /clear shrani ključne ugotovitve v CLAUDE.md.","when_not":"Ne /clear samo zato, ker je kontekst velik — /compact je varnejša izbira. Ne /compact ob prehodu na novo nalogo — staro znanje bo vnašalo pristranskost.","why_it_matters":"Razlika je nepovratna: /compact je varna intervencija, /clear je definitvna odločitev. Samodejni compaction je varnostna mreža, ne strategija — bolje proaktivno."},{"id":85,"section_id":13,"name":"CLAUDE.md — ključne točke","icon":"ti-file-description","badge_type":"when","badge_text":"Referenca","short_desc":"Root mapa, vedno v kontekstu, /init, @ sintaksa, dve hierarhiji — in kaj NIKOLI ne smeš shraniti","what_it_does":"<strong>Lokacija</strong>: root mapa projekta.<br><strong>Naloži se</strong>: samodejno ob vsaki seji, doda se k promptu.<br><strong>Ustvari</strong>: ukaz /init (Claude analizira projekt in napiše izhodišče).<br><strong>Referenciraj dokumentacijo</strong>: @README.md v vsebini.<br><strong>Hierarhija</strong>: projektni (version control, za team) + uporabniški (~/.claude/, za vse projekte).<br><strong>NIKOLI</strong>: API ključi, gesla, občutljivi podatki.","when_to_use":"Za stack, ukaze za zagon, kodne konvencije, arhitekturne odločitve — kar Claude vedno potrebuje. Anthropic priporoča: začni brez nje, dodaj ko vidiš ponavljajoče vzorce.","when_not":"Ne polni z vsem — samo kar res vedno potrebuje. Ne shrani gesel ali API ključev — datoteka je v version controlu.","why_it_matters":"Standardno izpitno vprašanje: kaj ne smeš shraniti v CLAUDE.md? API ključi in gesla. Razlika projektni/uporabniški je pogosta tema."},{"id":86,"section_id":13,"name":"CLAUDE.md vs Skills vs Subagents","icon":"ti-git-compare","badge_type":"when","badge_text":"Tri vloge","short_desc":"Vedno v kontekstu vs na zahtevo vs izvajalec — tri ločene vloge, ne alternative","what_it_does":"<strong>CLAUDE.md</strong>: vedno v kontekstu ob vsaki seji — stalno znanje o projektu.<br><strong>Skill</strong>: naloži se samo ko ga pokličeš (/skill ime) — proceduralno znanje na zahtevo.<br><strong>Subagent</strong>: ločeni agent z lastnim kontekstom, izvaja naloge neodvisno, vrne samo rezultat.<br><strong>Kombinacija</strong>: subagent s preloadanim skillom = specializiran izvajalec s specifičnim znanjem.","when_to_use":"CLAUDE.md: stalno, vsakdanje znanje o projektu. Skills: kompleksne procedure ki niso potrebne vsakič (deployment, code review). Subagents: delegiraj nalogo, ohrani čist kontekst.","when_not":"Ne zamenjuj vloge: skill ne izvaja nalog, subagent ne hrani stalnega znanja, CLAUDE.md ne delegira. Vsako orodje ima svojo, jasno vlogo.","why_it_matters":"Ena najpomembnejših konceptualnih razlik v tečaju. Tipično izpitno vprašanje: 'Kdaj Skills namesto CLAUDE.md?' Ko znanja ne rabiš vsakič — na zahtevo je ceneje."},{"id":87,"section_id":13,"name":"MCP — scopanje in stroški","icon":"ti-plug-connected","badge_type":"caution","badge_text":"Pazi na kontekst","short_desc":"Local / User / Project (.mcp.json) — vsak aktiven strežnik zasede kontekst","what_it_does":"<strong>Local</strong>: samo ta projekt, samo ti.<br><strong>User</strong>: vsi tvoji projekti (~/.claude/).<br><strong>Project</strong>: .mcp.json v version controlu — cel team dobi samodejno.<br><strong>Dodaš</strong>: claude mcp add (zunaj seje).<br><strong>Upravljaš</strong>: /mcp med sejo (začasni izklop).<br><strong>Kontekstni strošek</strong>: vsak aktiven strežnik naloži definicije orodij v kontekst brez koristi za nalogo.<br><strong>Alternativa</strong>: Skills + CLI za dobro definirane procedure.","when_to_use":"HTTP za javne servise (Slack, GitHub, Linear). Stdio za lokalne procese. Project scope za ekipne integracije. Redno izklapljaj neuporabljene z /mcp.","when_not":"Ne scopeaj vsega na User — postane nepregledno. Ne pozabi, da aktiven strežnik zasede kontekst tudi ko ga ne используješ.","why_it_matters":"Vprašanje na izpitu: kateri scope za ekipno deljenje? Project (.mcp.json). Zakaj izklapljati neuporabljene strežnike? Kontekstni stroški brez koristi."},{"id":88,"section_id":13,"name":"Hooks — dogodki in exit kode","icon":"ti-hook","badge_type":"when","badge_text":"Referenca","short_desc":"5 dogodkov × 3 exit kode — deterministično, vsakič, brez izjeme","what_it_does":"<strong>Dogodki</strong>: PreToolUse (pred orodjem, blokira), PostToolUse (po orodju — formatiranje), UserPromptSubmit (ob vnosu), Stop (ob zaključku — obvestila), Notification (ob Claude obvestilu).<br><strong>Exit kode (PreToolUse)</strong>: 0 = nadaljuj, 2 = blokiraj + stderr feedback Claudu, ostalo = neblokirajoča napaka samo zate.<br><strong>Konfiguracija</strong>: /hooks ali .claude/settings.json (ekipni, v repo).","when_to_use":"PostToolUse + 'Edit|Write' = auto-formatting. PreToolUse + exit 2 = hard block varnostnih pravil. Stop = obvestilo ob zaključku dolge naloge. .claude/settings.json v repo = ekipni hooks.","when_not":"Exit 2 brez sporočila = Claude ne ve zakaj in ponavlja. Hooks niso za soft suggestions — samo za deterministična, neizogibna pravila.","why_it_matters":"Izpitna past: exit koda 2 ne samo blokira — pošlje tudi feedback Claudu. Katera koli DRUGA koda ne blokira. To je specifičen, preverljiv detajl."},{"id":89,"section_id":13,"name":"Subagents — ključni koncepti","icon":"ti-robot","badge_type":"when","badge_text":"Referenca","short_desc":"Ločen kontekst, vzporednost, /agents, YAML, persistent memory, preload skills","what_it_does":"<strong>Kontekst</strong>: teče v svojem oknu — brez zgodovine tvoje seje, tvoj kontekst ostane čist.<br><strong>Ustvariš</strong>: /agents → 'Create new agent' (vodeni čarovnik).<br><strong>Format</strong>: Markdown .md z YAML frontmatter (ime, opis, orodja, prompt).<br><strong>Vzporedno</strong>: več subagentov hkrati za neodvisne naloge.<br><strong>Persistent memory</strong>: zapomni kontekst med sejami.<br><strong>Preload skills</strong>: skills ključ v YAML — naloži ob zagonu.","when_to_use":"Code reviewer pred PR-jem (read-only). Research in analiza po kodi. Vzporedna analiza neodvisnih delov. Specializirani subagenti z domenskim znanjem prek preload skills.","when_not":"Ne za naloge ki potrebujejo ves kontekst tvoje seje — subagent začne brez zgodovine pogovora. Ne za enkratne enostavne naloge.","why_it_matters":"Vprašanje na izpitu: zakaj je subagent boljši za code review? Svež kontekst brez pristranskosti pisanja kode — ujame kar glavna seja spregleda."},{"id":90,"section_id":13,"name":"Git workflow","icon":"ti-git-commit","badge_type":"when","badge_text":"Referenca","short_desc":"Subagent reviewer → /commit-push-pr → --from-pr za nadaljevanje po prekinitvi","what_it_does":"<strong>Subagent reviewer</strong>: read-only konfiguracija, svež pogled pred vsakim PR-jem.<br><strong>/commit-push-pr</strong>: commit + push + PR ustvaritev v enem koraku.<br><strong>Slack MCP</strong>: ob PR-ju samodejno objavi link v kanal (zahteva nastavitev).<br><strong>--from-pr &lt;ŠTEVILKA&gt;</strong>: obnovi kontekst PR-ja ustvarjenega prek gh pr create — nadaljuj po prekinitvi.","when_to_use":"Subagent reviewer pred vsakim PR-jem. /commit-push-pr ko si zadovoljen s kodo in review je opravljen. --from-pr ko se vračaš po review komentarjih ali CI napaki.","when_not":"/commit-push-pr ne za vmesne commite med razvojem. --from-pr ni potreben, če imaš sejo ki je ustvarila PR še odprto.","why_it_matters":"--from-pr obnovi kontekst PR-ja — ključno vprašanje: kdaj ga uporabiti? Ko se vračaš po prekinitvi na PR ki je bil ustvarjen prek gh pr create."},{"id":91,"section_id":13,"name":"Explore → Plan → Code → Commit","icon":"ti-refresh","badge_type":"when","badge_text":"Workflow","short_desc":"4-fazni workflow — vsaka faza ima namen, orodje in pravi trenutek za course-correct","what_it_does":"<strong>Explore</strong>: Plan Mode zbere kontekst — brez sprememb, samo razumevanje projekta.<br><strong>Plan</strong>: Claude sestavi načrt, ti odobriš — course-correct je tu brezplačen.<br><strong>Code</strong>: Approval ali Auto-accept; definiraj success criteria in test suite v promptu.<br><strong>Commit</strong>: subagent reviewer → /commit-push-pr.<br><strong>CLAUDE.md</strong>: shrani rešitve ponavljajočih se težav za naslednje seje.","when_to_use":"Vsakič za večjo nalogo. Explore + Plan sta naložba v kakovost Code faze. Brez tega večina začetnikov skače v Code in porablja čas za popravljanje napak.","when_not":"Ne za trivialne enodatotečne spremembe — Explore in Plan sta tam odvečna. Presodi glede na kompleksnost in tveganje naloge.","why_it_matters":"Najpomembnejši workflow v tečaju. Izpitno vprašanje: kdaj je course-correct najcenejši? V Plan fazi — preden je karkoli izvedeno. Napaka v načrtu stane nič, napaka v kodi stane čas."}],"notes":[{"id":61,"section_id":13,"note_type":"desc","content":"Ta lekcija je tvoj kompaktni pregled pred certifikatom. Vsaka kartica povzema ključne koncepte enega področja — v gostejši, referenčni obliki kot posamezne lekcije. Skupaj s Total Quizom je to tvoja zadnja postaja pred izpitom.","sort_order":-2},{"id":62,"section_id":13,"note_type":"tip","content":"Certifikatski izpit testira razumevanje konceptov in razlik med njimi — ne zapomnitve ukazov. Fokusiraj se na ZAKAJ in KDAJ, ne samo na KAJ.","sort_order":-1},{"id":63,"section_id":13,"note_type":"subsection-header","content":"Najpogostejše pasti na izpitu","sort_order":10},{"id":64,"section_id":13,"note_type":"warning","content":"<strong>Tri pasti:</strong> (1) Auto-accept Mode še vedno zahteva potrditev za terminalne ukaze — samo datoteke so samodejne. (2) /compact ≠ /clear — ohrani spomin vs izbriše vse. (3) Exit koda 2 v Hooks ne samo blokira — pošlje feedback Claudu. Katera koli DRUGA koda ne blokira.","sort_order":11}],"questions":[{"id":107,"q":"Auto-accept Mode samodejno sprejema spremembe datotek. Kaj pa terminalni ukazi?","options":["Tudi terminalni ukazi se izvedejo samodejno","Terminalni ukazi (npm, git, rm…) še vedno zahtevajo potrditev","Terminalni ukazi so v Auto-accept Mode onemogočeni","Odvisno od nastavitev terminala"],"correct":1,"explanation":"Auto-accept Mode ne pomeni vse samodejno. Spremembe datotek so samodejne, terminalni ukazi pa še vedno zahtevajo potrditev — to je pogosta napačna predpostavka."},{"id":108,"q":"Delaš na kompleksni nalogi, kontekst se polni. Hočeš nadaljevati brez izgube niti. Kateri ukaz?","options":["/clear — popolna ponastavitev","/compact — stisni, ohrani spomin, nadaljuj","/context — diagnostika stanja","Restaraj sejo"],"correct":1,"explanation":"/compact ročno stisne pogovor, ohrani spomin na potek dela in sprosti prostor. /clear bi izbrisal VSE — izgubil bi celoten kontekst naloge."},{"id":109,"q":"Kaj NIKOLI ne smeš shraniti v CLAUDE.md?","options":["Ukaze za zagon dev serverja","Arhitekturne odločitve projekta","API ključe in gesla","Kodni slog in konvencije"],"correct":2,"explanation":"CLAUDE.md je besedilna datoteka commitana v version control — vidna vsem z dostopom do repozitorija. API ključi in gesla tam nimajo mesta nikoli."},{"id":110,"q":"Tvoj PreToolUse hook vrne exit kodo 2 z besedilom na stderr. Kaj se zgodi?","options":["Hook se je sesul — napaka se ignorira","Claude se ustavi brez razlage","Akcija je blokirana IN Claude dobi sporočilo kot feedback ter se prilagodi","Akcija se izvede, napaka se zapiše v log"],"correct":2,"explanation":"Exit 2 = blokiraj + stderr sporočilo gre Claudu kot feedback. Claude razume zakaj je bil ustavljen in predlaga alternativo — ne samo slepa blokada."},{"id":111,"q":"Hočeš, da cel team samodejno dobi iste MCP strežnike ob kloniranju repozitorija. Kateri scope?","options":["Local scope","User scope (~/.claude/)","Project scope prek .mcp.json v repozitoriju","Global scope prek CLAUDE.md"],"correct":2,"explanation":"Project scope zahteva .mcp.json datoteko v repozitoriju. Ko ekipa klonira repo, dobijo enake MCP strežnike samodejno — brez ročnega nastavljanja za vsakega."},{"id":112,"q":"Katera je ključna razlika med CLAUDE.md in Skills glede nalaganja v kontekst?","options":["CLAUDE.md se naloži na zahtevo, Skills vedno","CLAUDE.md se naloži vedno ob vsaki seji, Skills samo ko jih eksplicitno pokličeš","Oba se naložita vedno — razlika je samo v formatu","Skills se naložijo ob zagonu Claude Code, CLAUDE.md na zahtevo"],"correct":1,"explanation":"CLAUDE.md je vedno v kontekstu — samodejno doda k vsakemu promptu. Skill se naloži samo ko ga pokličeš z /skill ali referenco. To je bistvena razlika za upravljanje kontekstnega prostora."},{"id":113,"q":"Zakaj je subagent boljši za code review kot glavna seja?","options":["Ker je hitrejši pri branju kode","Ker ima dostop do interneta","Ker teče brez konteksta pisanja kode — svež pogled brez pristranskosti","Ker pozna vse kodne konvencije projekta"],"correct":2,"explanation":"Glavna seja nosi ves kontekst pisanja kode in z njim slepe pege — težje opazi lastne napake. Subagent začne svež, brez tega konteksta, in ujame kar glavna seja spregleda."},{"id":114,"q":"Hočeš, da Claude po vsakem urejanju datoteke samodejno požene formatter. Kateri hook?","options":["PreToolUse — teče pred urejanjem","UserPromptSubmit — teče ob vnosu","PostToolUse z matcherjem 'Edit|Write'","Stop — teče ob zaključku"],"correct":2,"explanation":"PostToolUse se izvede takoj ko orodje zaključi. Matcher 'Edit|Write' zagotovi, da se hook sproži samo ob urejanju/pisanju datotek — ne pri vsakem klicu orodja."},{"id":115,"q":"V kateri fazi workflowa Explore → Plan → Code → Commit je course-correct najcenejši?","options":["Explore — takoj na začetku","Plan — preden je karkoli izvedeno","Code — ko je koda že vidna","Commit — na samem koncu"],"correct":1,"explanation":"Plan faza je pred izvedbo — napaka v načrtu stane nič. Ko je koda enkrat napisana, je popravek dražji. Plan faza je varnostna mreža, ne administrativni korak."},{"id":116,"q":"Kateri ukaz obnovi kontekst PR-ja in nadaljuje sejo po review komentarjih?","options":["/compact z ID PR-ja","claude --resume","claude --from-pr <ŠTEVILKA>","/mcp pr connect"],"correct":2,"explanation":"claude --from-pr <ŠTEVILKA> obnovi kontekst PR-ja ustvarjenega prek gh pr create — nadaljuješ točno tam kjer si ostal, brez ponovnega razlaganja."},{"id":117,"q":"Kateri PreToolUse exit kodi BLOKIRATA akcijo?","options":["Samo exit 0","Samo exit 2","Exit 2 in vse kode razen 0","Samo exit 1"],"correct":1,"explanation":"Samo exit koda 2 blokira akcijo in pošlje feedback Claudu. Exit 0 = nadaljuj. Katera koli DRUGA koda (1, 3, ...) = neblokirajoča napaka vidna samo tebi — Claude ne ve zanjo in nadaljuje."},{"id":118,"q":"Hočeš dati Claudu dostop do Linear (projektno orodje) za celoten team. Kateri tip strežnika in kateri scope?","options":["Stdio strežnik, Local scope","HTTP strežnik, User scope","HTTP strežnik, Project scope (.mcp.json v repo)","Stdio strežnik, Project scope"],"correct":2,"explanation":"Linear je oddaljena storitev → HTTP strežnik. Za ekipno deljenje → Project scope z .mcp.json v repozitoriju. Cel team dobi samodejno ob kloniranju."}]}]}]}];
+
+/* ── State ──────────────────────────────────────────────────────── */
+let currentCourseId   = 1;
+let currentChapterId  = 1;
+let currentSectionId  = null;
+let selectedFeatureId = null;
+let drawerOpen        = false;
+let pickerOpen        = false;
+let quiz              = null;
+
+/* ── Helpers ────────────────────────────────────────────────────── */
+function getCourse()  { return COURSES.find(c => c.id === currentCourseId); }
+function getChapter() { return getCourse().chapters.find(c => c.id === currentChapterId); }
+function getSection() {
+  if (!currentSectionId) return null;
+  return getChapter().sections.find(s => s.id === currentSectionId);
+}
+
+/* ── Navigation ─────────────────────────────────────────────────── */
+function goToCourse(id) {
+  currentCourseId  = id;
+  currentChapterId = getCourse().chapters[0].id;
+  currentSectionId = null;
+  selectedFeatureId = null;
+  quiz = null;
+  closePicker();
+  render();
+}
+
+function goToChapter(id) {
+  currentChapterId  = id;
+  currentSectionId  = null;
+  selectedFeatureId = null;
+  quiz = null;
+  render();
+}
+
+function goToLesson(chId, secId) {
+  currentChapterId  = chId;
+  currentSectionId  = secId;
+  selectedFeatureId = null;
+  quiz = null;
+  closeDrawer();
+  render();
+  window.scrollTo(0, 0);
+}
+
+function selectFeature(id) {
+  selectedFeatureId = (selectedFeatureId === id) ? null : id;
+  render();
+}
+
+function toggleRefl(idx) {
+  const el = document.getElementById('refl-' + idx);
+  if (el) el.classList.toggle('open');
+}
+
+function toggleDrawerChapter(chId) {
+  const el = document.getElementById('dsecs-' + chId);
+  if (el) el.classList.toggle('open');
+  const btn = document.getElementById('dch-' + chId);
+  if (btn) {
+    const arrow = btn.querySelector('.drawer-ch-arrow i');
+    if (arrow) arrow.className = el.classList.contains('open') ? 'ti ti-chevron-up' : 'ti ti-chevron-down';
+  }
+}
+
+/* ── Drawer / Picker ────────────────────────────────────────────── */
+function openDrawer() {
+  drawerOpen = true;
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+  renderDrawer();
+}
+function closeDrawer() {
+  drawerOpen = false;
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+}
+function openPicker() {
+  pickerOpen = true;
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('picker').classList.add('open');
+  renderPicker();
+}
+function closePicker() {
+  pickerOpen = false;
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('picker').classList.remove('open');
+}
+function closeAll() {
+  closeDrawer();
+  closePicker();
+}
+
+function renderDrawer() {
+  const course = getCourse();
+  let html = '';
+  for (const ch of course.chapters) {
+    const isActiveCh = ch.id === currentChapterId;
+    const secsHtml = ch.sections.map(s => {
+      const isActiveSec = isActiveCh && s.id === currentSectionId;
+      const titleParts = s.title.split(':');
+      const secTitle = titleParts.length > 1 ? titleParts.slice(1).join(':').trim() : s.title;
+      return `<button class="drawer-sec-btn${isActiveSec ? ' active' : ''}"
+        onclick="goToLesson(${ch.id}, ${s.id})">
+        <span class="drawer-sec-dot"></span>
+        <span class="drawer-sec-lesson">${s.lesson}</span>
+        <span class="drawer-sec-title">${secTitle}</span>
+      </button>`;
+    }).join('');
+
+    html += `<div class="drawer-chapter">
+      <button class="drawer-ch-btn${isActiveCh ? ' active' : ''}" id="dch-${ch.id}"
+        onclick="toggleDrawerChapter(${ch.id})">
+        <span class="drawer-ch-num">Pog. ${ch.id}</span>
+        <span class="drawer-ch-title">${ch.title}</span>
+        <span class="drawer-ch-arrow"><i class="ti ti-chevron-${isActiveCh ? 'up' : 'down'}"></i></span>
+      </button>
+      <div class="drawer-sections${isActiveCh ? ' open' : ''}" id="dsecs-${ch.id}">
+        ${secsHtml}
+      </div>
+    </div>`;
+  }
+  document.getElementById('drawer-body').innerHTML = html;
+}
+
+function renderPicker() {
+  let html = '';
+  for (const c of COURSES) {
+    const totalLessons = c.chapters.reduce((n, ch) => n + ch.sections.length, 0);
+    html += `<div class="course-card${c.id === currentCourseId ? ' active' : ''}"
+      onclick="goToCourse(${c.id})">
+      <div class="course-card-title">${c.title}</div>
+      <div class="course-card-sub">${c.subtitle} &middot; ${c.chapters.length} poglavij &middot; ${totalLessons} lekcij</div>
+    </div>`;
+  }
+  document.getElementById('picker-body').innerHTML = html;
+}
+
+/* ── Notes ──────────────────────────────────────────────────────── */
+function renderNote(n) {
+  switch (n.note_type) {
+    case 'desc':
+      return `<p class="note-desc">${n.content}</p>`;
+    case 'tip':
+      return `<div class="note-tip"><i class="ti ti-info-circle"></i><span>${n.content}</span></div>`;
+    case 'warning':
+      return `<div class="note-warning"><i class="ti ti-alert-triangle"></i><span>${n.content}</span></div>`;
+    case 'subsection-header':
+      return `<div class="note-subsection">${n.content}</div>`;
+    case 'youtube':
+      return `<div class="note-youtube">
+        <iframe src="https://www.youtube.com/embed/${n.content}" allowfullscreen loading="lazy"></iframe>
+      </div>`;
+    case 'image':
+      return `<figure class="note-image">
+        <img src="${n.content}" alt="${n.caption || ''}" loading="lazy">
+        ${n.caption ? `<figcaption>${n.caption}</figcaption>` : ''}
+      </figure>`;
+    default:
+      return '';
+  }
+}
+
+/* ── Render ─────────────────────────────────────────────────────── */
+function renderHeader() {
+  const course = getCourse();
+  const ch = getChapter();
+  const totalSections = course.chapters.reduce((n, c) => n + c.sections.length, 0);
+  let doneSections = 0;
+  for (const c of course.chapters) {
+    if (c.id < currentChapterId) { doneSections += c.sections.length; continue; }
+    if (c.id === currentChapterId && currentSectionId) {
+      const idx = c.sections.findIndex(s => s.id === currentSectionId);
+      doneSections += idx + 1;
+    }
+    break;
+  }
+  const pct = totalSections ? Math.round(doneSections / totalSections * 100) : 0;
+
+  let title = ch ? ch.title : course.title;
+  if (currentSectionId) {
+    const sec = getSection();
+    if (sec) {
+      const parts = sec.title.split(':');
+      title = parts[0].trim();
+    }
+  }
+
+  document.getElementById('header-title').textContent = title;
+  document.getElementById('header-pos').textContent = `Pog. ${currentChapterId}/${course.chapters.length}`;
+  document.getElementById('header-progress-fill').style.width = pct + '%';
+}
+
+function renderChapterOverview(ch) {
+  const objHtml = (ch.objectives || []).map(o =>
+    `<div class="ch-obj-item"><i class="ti ti-check"></i><span>${o}</span></div>`
+  ).join('');
+
+  const sectionsHtml = ch.sections.map(s => {
+    const titleParts = s.title.split(':');
+    const mainTitle = titleParts.length > 1 ? titleParts.slice(1).join(':').trim() : s.title;
+    const featCount = s.features.length;
+    const qCount = (s.questions || []).length;
+    return `<div class="lesson-card" onclick="goToLesson(${ch.id}, ${s.id})">
+      <span class="lesson-card-num">${s.lesson}</span>
+      <div class="lesson-card-info">
+        <div class="lesson-card-title">${mainTitle}</div>
+        <div class="lesson-card-meta">${featCount} konceptov &middot; ${qCount} vprašanj</div>
+      </div>
+      <i class="ti ti-chevron-right lesson-card-arrow"></i>
+    </div>`;
+  }).join('');
+
+  const reflHtml = (ch.reflections || []).length ? `
+    <div class="ch-reflections">
+      <div class="refl-label">Refleksija</div>
+      ${ch.reflections.map((r, i) => {
+        const parts = r.split('|');
+        const q = parts[0];
+        const hint = parts[1] || '';
+        return `<div class="refl-item" id="refl-${i}">
+          <button class="refl-q" onclick="toggleRefl(${i})">
+            <span>${q}</span><i class="ti ti-chevron-down"></i>
+          </button>
+          ${hint ? `<div class="refl-hint">${hint}</div>` : ''}
+        </div>`;
+      }).join('')}
+    </div>` : '';
+
+  return `<div class="content-wrap">
+    <div class="ch-overview-header">
+      <div class="ch-label">Poglavje ${ch.id}</div>
+      <div class="ch-title">${ch.title}</div>
+    </div>
+    ${objHtml.length ? `<div class="ch-objectives">
+      <div class="ch-obj-label">Cilji poglavja</div>
+      ${objHtml}
+    </div>` : ''}
+    <div class="ch-sections-label">Lekcije</div>
+    ${sectionsHtml}
+    ${reflHtml}
+  </div>`;
+}
+
+function renderLesson() {
+  const ch = getChapter();
+  const sec = getSection();
+  if (!sec) return '';
+
+  const titleParts = sec.title.split(':');
+  const mainTitle = titleParts[0].trim();
+  const subTitle  = titleParts.length > 1 ? titleParts.slice(1).join(':').trim() : '';
+
+  const preNotes  = (sec.notes  || []).filter(n => n.sort_order <= 0).sort((a,b) => a.sort_order - b.sort_order);
+  const postNotes = (sec.notes  || []).filter(n => n.sort_order  > 0).sort((a,b) => a.sort_order - b.sort_order);
+  const features  = [...(sec.features || [])].sort((a,b) => a.sort_order - b.sort_order);
+
+  const preHtml  = preNotes.map(renderNote).join('');
+  const postHtml = postNotes.map(renderNote).join('');
+
+  const cardsHtml = features.map(f => {
+    const isSelected = f.id === selectedFeatureId;
+    const badgeCls = `badge-${f.badge_type || 'when'}`;
+    const detailHtml = isSelected ? `<div class="detail-panel">
+      <div class="detail-panel-title"><i class="ti ${f.icon}"></i> ${f.name}</div>
+      <div class="detail-grid">
+        <div class="detail-cell">
+          <div class="detail-cell-label">Kaj dela</div>
+          <div class="detail-cell-val">${f.what_it_does}</div>
+        </div>
+        <div class="detail-cell">
+          <div class="detail-cell-label">Kdaj uporabiti</div>
+          <div class="detail-cell-val">${f.when_to_use}</div>
+        </div>
+        <div class="detail-cell">
+          <div class="detail-cell-label">Kdaj NE</div>
+          <div class="detail-cell-val">${f.when_not}</div>
+        </div>
+        <div class="detail-cell">
+          <div class="detail-cell-label">Zakaj to šteje</div>
+          <div class="detail-cell-val">${f.why_it_matters}</div>
+        </div>
+      </div>
+    </div>` : '';
+
+    return `<div class="feature-card${isSelected ? ' selected' : ''}" onclick="selectFeature(${f.id})">
+      <div class="feature-name">
+        <i class="ti ${f.icon} feature-icon"></i>
+        <span class="feature-name-text">${f.name}</span>
+        ${f.badge_text ? `<span class="feature-badge ${badgeCls}">${f.badge_text}</span>` : ''}
+      </div>
+      <div class="feature-short">${f.short_desc}</div>
+    </div>
+    ${detailHtml}`;
+  }).join('');
+
+  const hasQ = (sec.questions || []).length > 0;
+  const quizBtn = hasQ ? `<button class="lesson-quiz-btn" onclick="startQuiz('lesson', ${sec.id})">
+    <i class="ti ti-circle-check"></i> Preizkusi znanje (${sec.questions.length} vpr.)
+  </button>` : '';
+
+  const navHtml = renderLessonNav(ch, sec);
+
+  return `<div class="content-wrap">
+    <div class="lesson-title-wrap">
+      <div class="lesson-label">${sec.lesson}</div>
+      <div class="lesson-title">${mainTitle}</div>
+      ${subTitle ? `<div class="lesson-subtitle">${subTitle}</div>` : ''}
+    </div>
+    ${preHtml}
+    ${features.length ? `<div class="feature-section-label">Koncepti</div>` : ''}
+    ${cardsHtml}
+    ${postHtml}
+    ${quizBtn}
+    ${navHtml}
+  </div>`;
+}
+
+function renderLessonNav(ch, sec) {
+  const allSecs = getCourse().chapters.flatMap(c => c.sections.map(s => ({chId: c.id, sec: s})));
+  const idx = allSecs.findIndex(x => x.chId === ch.id && x.sec.id === sec.id);
+  const prev = idx > 0 ? allSecs[idx-1] : null;
+  const next = idx < allSecs.length-1 ? allSecs[idx+1] : null;
+  const prevBtn = prev
+    ? `<button onclick="goToLesson(${prev.chId},${prev.sec.id})" style="flex:1;display:flex;align-items:center;gap:.3rem;padding:.75rem;background:var(--surface);border-radius:var(--radius);color:var(--text-sec);font-size:13px;border:0.5px solid var(--border)"><i class="ti ti-arrow-left"></i> Prej</button>`
+    : `<div style="flex:1"></div>`;
+  const nextBtn = next
+    ? `<button onclick="goToLesson(${next.chId},${next.sec.id})" style="flex:1;display:flex;align-items:center;justify-content:flex-end;gap:.3rem;padding:.75rem;background:var(--surface);border-radius:var(--radius);color:var(--text-sec);font-size:13px;border:0.5px solid var(--border)">Naprej <i class="ti ti-arrow-right"></i></button>`
+    : `<div style="flex:1"></div>`;
+  return `<div style="display:flex;gap:.5rem;margin-top:1.5rem;">${prevBtn}${nextBtn}</div>`;
+}
+
+function renderQuizPanel() {
+  return `<div class="content-wrap">${quizEngineHTML()}</div>`;
+}
+
+/* ── Quiz engine ────────────────────────────────────────────────── */
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function collectQuestions(scope, id) {
+  const course = getCourse();
+  if (scope === 'lesson') {
+    const ch = course.chapters.find(c => c.sections.some(s => s.id === id));
+    const sec = ch ? ch.sections.find(s => s.id === id) : null;
+    return sec ? (sec.questions || []) : [];
+  } else if (scope === 'chapter') {
+    const ch = course.chapters.find(c => c.id === id);
+    return ch ? ch.sections.flatMap(s => s.questions || []) : [];
+  } else {
+    return course.chapters.flatMap(ch => ch.sections.flatMap(s => s.questions || []));
+  }
+}
+
+function startQuiz(scope, id) {
+  const pool = shuffle(collectQuestions(scope, id));
+  if (!pool.length) { return; }
+  quiz = { scope, id, pool, idx: 0, correct: 0, answered: false, selected: null };
+  closeDrawer();
+  closePicker();
+  render();
+  window.scrollTo(0, 0);
+}
+
+function answerQuiz(oi) {
+  if (!quiz || quiz.answered) return;
+  quiz.selected = oi;
+  quiz.answered = true;
+  if (oi === quiz.pool[quiz.idx].correct) quiz.correct++;
+  render();
+}
+
+function nextQuiz() {
+  if (!quiz) return;
+  quiz.idx++;
+  quiz.answered = false;
+  quiz.selected = null;
+  render();
+  window.scrollTo(0, 0);
+}
+
+function exitQuiz() {
+  quiz = null;
+  render();
+}
+
+function quizEngineHTML() {
+  const q = quiz;
+  if (q.idx >= q.pool.length) {
+    const pct = Math.round(q.correct / q.pool.length * 100);
+    const label = pct >= 80 ? 'Odlično!' : pct >= 60 ? 'Dobro!' : 'Poskusi znova';
+    return `<div class="quiz-score-wrap">
+      <div class="quiz-score-circle">${pct}%</div>
+      <div class="quiz-score-count">${q.correct} / ${q.pool.length} pravilnih</div>
+      <div class="quiz-score-label">${label}</div>
+      <div class="quiz-score-actions">
+        <button class="btn-primary" onclick="startQuiz('${q.scope}',${q.id})">Ponovi kviz</button>
+        <button class="btn-ghost" onclick="exitQuiz()">Zapri</button>
+      </div>
+    </div>`;
+  }
+
+  const item = q.pool[q.idx];
+  const pct  = Math.round(q.idx / q.pool.length * 100);
+  const opts = item.options.map((o, i) => {
+    let cls = 'quiz-opt';
+    if (q.answered) {
+      if (i === item.correct) cls += ' correct';
+      else if (i === q.selected) cls += ' wrong';
+    }
+    return `<button class="${cls}" onclick="answerQuiz(${i})"${q.answered ? ' disabled' : ''}>${o}</button>`;
+  }).join('');
+
+  return `<div class="quiz-panel">
+    <div class="quiz-header">
+      <span class="quiz-counter">${q.idx + 1} / ${q.pool.length}</span>
+      <button class="quiz-exit-btn" onclick="exitQuiz()">× Zapri</button>
+    </div>
+    <div class="quiz-bar-wrap"><div class="quiz-bar-fill" style="width:${pct}%"></div></div>
+    <div class="quiz-q">${item.q}</div>
+    <div class="quiz-opts">${opts}</div>
+    ${q.answered ? `<div class="quiz-explanation">${item.explanation}</div>
+    <button class="quiz-next-btn" onclick="nextQuiz()">
+      ${q.idx + 1 < q.pool.length ? 'Naslednje →' : 'Rezultati →'}
+    </button>` : ''}
+  </div>`;
+}
+
+/* ── Master render ──────────────────────────────────────────────── */
+function render() {
+  renderHeader();
+
+  let html = '';
+  if (quiz) {
+    html = renderQuizPanel();
+    document.getElementById('bn-kviz').classList.add('active');
+    document.getElementById('bn-vsebina').classList.remove('active');
+    document.getElementById('bn-kurzi').classList.remove('active');
+  } else if (currentSectionId) {
+    html = renderLesson();
+    document.getElementById('bn-vsebina').classList.add('active');
+    document.getElementById('bn-kviz').classList.remove('active');
+    document.getElementById('bn-kurzi').classList.remove('active');
+  } else {
+    const ch = getChapter();
+    html = renderChapterOverview(ch);
+    document.getElementById('bn-vsebina').classList.add('active');
+    document.getElementById('bn-kviz').classList.remove('active');
+    document.getElementById('bn-kurzi').classList.remove('active');
+  }
+
+  document.getElementById('app').innerHTML = html;
+}
+
+/* ── Init ───────────────────────────────────────────────────────── */
+render();
+</script>
+</body>
+</html>
