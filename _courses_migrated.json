@@ -3358,7 +3358,10 @@
         "objectives": [
           "Definirati Claude Cowork in razložiti, kaj ga naredi drugačen način dela s Claudom",
           "Razumeti Cowork kot Claudovo delovanje v tvojem okolju — na tvojih datotekah, v tvojih aplikacijah, z tvojimi orodji",
-          "Ločiti Chat, Cowork in Code ter vedeti, kdaj poseči po katerem"
+          "Ločiti Chat, Cowork in Code ter vedeti, kdaj poseči po katerem",
+          "Odpreti Cowork v Claude Desktop app in ga usmeriti na delovno mapo",
+          "Dodati vsaj en connector",
+          "Prepoznati, kdaj Claude vpraša za dovoljenje — in kdaj ne — ter z zaupanjem predati nalogo"
         ],
         "reflections": [
           "Pomisli na nalogo, ki si jo nedavno opravil/a, kjer je bila vrednost v izvedbi, ne le v razmišljanju.|Morda je zajemala več orodij ali se končala z rezultatom, ki si ga sestavil/a ročno. Drži se te naloge — vrneš se k njej v Lekciji 3 in 4."
@@ -3587,6 +3590,246 @@
                 ],
                 "correct": 1,
                 "explanation": "'Deluje v tvojem imenu' pomeni, da Cowork dejansko ukrepa — dostopa do datotek, aplikacij in izvaja dejanja, ne le svetuje."
+              }
+            ]
+          },
+          {
+            "id": 2,
+            "lesson": "Lekcija 2",
+            "title": "Setting up Claude Cowork",
+            "features": [
+              {
+                "id": 6,
+                "section_id": 2,
+                "name": "Namesti Cowork",
+                "icon": "ti-download",
+                "badge_type": "when",
+                "badge_text": "Prvo",
+                "short_desc": "Cowork živi znotraj Claude Desktop app — ni ločena aplikacija",
+                "what_it_does": "Odpri Claude Desktop, poišči izbirnik načinov v zgornjem desnem kotu — tam je Cowork. Na voljo za Mac in Windows.",
+                "when_to_use": "Ko prvič vzpostavljaš Cowork delovišče.",
+                "when_not": "Če Cowork v meniju ni viden, morda potrebuješ novejšo različico Desktop app ali beta dostop.",
+                "why_it_matters": "Ni ločen download, ni ločena prijava — vse živi znotraj iste aplikacije, ki jo že poznaš.",
+                "sort_order": 1
+              },
+              {
+                "id": 7,
+                "section_id": 2,
+                "name": "Določi delovno mapo",
+                "icon": "ti-folder-open",
+                "badge_type": "when",
+                "badge_text": "Najpomembnejše",
+                "short_desc": "Mapa = center Cowork delovišča — najpomembnejša nastavitev pri vzpostavitvi",
+                "what_it_does": "Klikneš 'Add Folder to Cowork' in izbereš mapo. Claude prebere vse datoteke v njej (Word, Excel, PDF, PowerPoint…) ter shranjuje dokončane rezultate nazaj vanjo.",
+                "when_to_use": "Izberi mapo za en projekt ali tok dela — ne celotne Documents mape. Manjši obseg = boljša pozornost.",
+                "when_not": "Ne daj Claudu dostopa do celotnih dokumentov. Omeji dostop na tisto, kar je potrebno za nalogo.",
+                "why_it_matters": "Mapa je spomin in izhodišče Cowork naloge. Brez dobro izbrane mape Cowork nima pravega konteksta.",
+                "sort_order": 2
+              },
+              {
+                "id": 8,
+                "section_id": 2,
+                "name": "Dodaj connectors",
+                "icon": "ti-plug-connected",
+                "badge_type": "when",
+                "badge_text": "Poveži",
+                "short_desc": "Connectors povežejo Cowork z aplikacijami, kjer tvoje delo dejansko živi",
+                "what_it_does": "E-pošta in koledar (Outlook/Gmail), sporočila (Slack/Teams), cloud shramba (Google Drive, SharePoint, Box), CRM in projektna orodja (Notion, Salesforce, Asana, Linear…). Ko connector dodaš, ga omeniš naravno v promptu in Cowork ve, kje iskati.",
+                "when_to_use": "Ko naloga sega v e-pošto, Slack, Google Drive ali drug cloud vir. Večina začne z e-pošto in cloud shrambo.",
+                "when_not": "Cloud connectors ne zamenjajo lokalne mape — za gradnjo in iteracijo dokumentov je lokalna mapa še vedno najzanesljivejša.",
+                "why_it_matters": "Connectors so razlika med 'Cowork ve za tvoje datoteke' in 'Cowork ve za vse, kjer tvoje delo živi'.",
+                "sort_order": 3
+              },
+              {
+                "id": 9,
+                "section_id": 2,
+                "name": "Model dovoljenj",
+                "icon": "ti-lock",
+                "badge_type": "when",
+                "badge_text": "Varnost",
+                "short_desc": "Privzeto: Cowork vpraša pred vsako akcijo — razen branja in pisanja v tvojo mapo",
+                "what_it_does": "Dva načina: 'Ask before acting' — Cowork se ustavi in vpraša, preden pošlje e-pošto, objavi v Slack ali izbriše datoteko. 'Trust this session' — Cowork deluje brez prekinitev, ko ga aktivno spremljaš.",
+                "when_to_use": "'Ask before acting' za nova orodja, nepoznane mape ali vse, kar hočeš natančno nadzirati. 'Trust this session' ko aktivno spremljaš in zaupAš kontekstu.",
+                "when_not": "Ne pusti 'Trust this session' vklopljenega za naloge, ki jih ne spremljaš aktivno.",
+                "why_it_matters": "Nadzor nad dovoljenji je tvoj varnostni pas — veš, kaj Cowork počne, preden to postori.",
+                "sort_order": 4
+              },
+              {
+                "id": 10,
+                "section_id": 2,
+                "name": "Trajno brisanje: izjema",
+                "icon": "ti-trash-x",
+                "badge_type": "when",
+                "badge_text": "Pravilo",
+                "short_desc": "Cowork vedno vpraša pred trajnim brisanjem datotek — brez izjeme, v obeh načinih",
+                "what_it_does": "Ne glede na način dovoljenj ('Ask' ali 'Trust this session') — Cowork se vedno ustavi in vpraša, preden trajno izbriše datoteko.",
+                "when_to_use": "Vedno — to pravilo ni nastavitev, ki jo lahko izključiš.",
+                "when_not": "Ni izjem. Trajno brisanje zahteva tvojo eksplicitno potrditev vsakič.",
+                "why_it_matters": "Ena zaščitna mreža, ki je vgrajena v dizajn — ne v nastavitve. Zagotavlja, da Cowork nikoli ne izbriše dela brez tvojega vedenja.",
+                "sort_order": 5
+              },
+              {
+                "id": 11,
+                "section_id": 2,
+                "name": "Preizkusi zdaj",
+                "icon": "ti-rocket",
+                "badge_type": "when",
+                "badge_text": "Vaja",
+                "short_desc": "Štirje koraki: mapa → connector → povzetek → preveri",
+                "what_it_does": "1. Izberi mapo z resničnim delom. 2. Poveži e-pošto ali cloud shrambo. 3. Reci Cowork-u: 'Preglej vse v mapi in mi napiši kratek opis tega, kar si se naučil.' 4. Preberi povzetek — kaj je ujel, kaj je zgrešil, kaj te je presenetilo?",
+                "when_to_use": "Takoj po namestitvi — to je tvoj prvi pravi Cowork test.",
+                "when_not": "Če nisi pripravljen/a deliti resničnih datotek, ustvari testno mapo s kopijami ali vzorčnimi dokumenti.",
+                "why_it_matters": "Razlika med 'razumem Cowork teoretično' in 'videl/a sem Cowork delati na mojih podatkih' je ogromna. Ta vaja premosti to vrzel.",
+                "sort_order": 6
+              }
+            ],
+            "notes": [
+              {
+                "id": 8,
+                "section_id": 2,
+                "note_type": "desc",
+                "content": "Cowork živi znotraj Claude Desktop app. Vzpostavitev ima tri korake: izberi delovno mapo, dodaj connectors za cloud orodja in razumi model dovoljenj — da veš, kdaj Cowork vpraša in kdaj ne.",
+                "sort_order": -2
+              },
+              {
+                "id": 9,
+                "section_id": 2,
+                "note_type": "tip",
+                "content": "Najpomembnejša nastavitev: izbira mape. Izberi mapo za en projekt, ne celotnega arhiva dokumentov — manjši obseg daje Claudu boljši fokus.",
+                "sort_order": -1
+              },
+              {
+                "id": 10,
+                "section_id": 2,
+                "note_type": "subsection-header",
+                "content": "Dodajanje connectors",
+                "sort_order": 10
+              },
+              {
+                "id": 11,
+                "section_id": 2,
+                "note_type": "desc",
+                "content": "Connectors so most med Cowork in cloud orodji: e-pošta in koledar (Outlook/Gmail) · sporočila (Slack/Teams) · cloud shramba (Google Drive, SharePoint, Box) · CRM in projektna orodja (Notion, Salesforce, Asana…). Ko connector dodaš, ga omeniš naravno v promptu.",
+                "sort_order": 11
+              },
+              {
+                "id": 12,
+                "section_id": 2,
+                "note_type": "subsection-header",
+                "content": "Model dovoljenj",
+                "sort_order": 20
+              },
+              {
+                "id": 13,
+                "section_id": 2,
+                "note_type": "desc",
+                "content": "Dva načina: 'Ask before acting' (privzeto) — Cowork se ustavi in vpraša pred vsakim dejanjem, ki ni branje ali pisanje v mapo. 'Trust this session' — deluje brez prekinitev, ko aktivno spremljaš nalogo.",
+                "sort_order": 21
+              },
+              {
+                "id": 14,
+                "section_id": 2,
+                "note_type": "warning",
+                "content": "Cowork vedno vpraša pred trajnim brisanjem datotek — brez izjeme, ne glede na način dovoljenj.",
+                "sort_order": 22
+              }
+            ],
+            "questions": [
+              {
+                "id": 9,
+                "q": "Kje najdeš Cowork v Claude Desktop app?",
+                "options": [
+                  "V ločeni aplikaciji, ki jo namestiš posebej",
+                  "V izbirniku načinov v zgornjem desnem kotu Claude Desktop",
+                  "Na spletni strani claude.ai",
+                  "V nastavitvah operacijskega sistema"
+                ],
+                "correct": 1,
+                "explanation": "Cowork živi znotraj Claude Desktop app — ni ločen download. Poiščeš ga v izbirniku načinov v zgornjem desnem kotu."
+              },
+              {
+                "id": 10,
+                "q": "Kaj je najpomembnejša nastavitev pri vzpostavitvi Cowork?",
+                "options": [
+                  "Izbira barve teme",
+                  "Nastavitev jezikovnih preferenc",
+                  "Izbira delovne mape",
+                  "Vnos API ključa"
+                ],
+                "correct": 2,
+                "explanation": "Mapa je spomin in izhodišče Cowork naloge — brez dobro izbrane mape Cowork nima konteksta."
+              },
+              {
+                "id": 11,
+                "q": "Zakaj je priporočljivo izbrati mapo za en projekt, ne celotne Documents mape?",
+                "options": [
+                  "Zaradi varčevanja s prostorom na disku",
+                  "Manjši obseg daje Claudu boljši fokus in natančnejše rezultate",
+                  "Cowork ne zna delati z velikimi mapami",
+                  "Iz varnostnih razlogov operacijskega sistema"
+                ],
+                "correct": 1,
+                "explanation": "Manjši, natančno določen obseg = boljša pozornost in relevantnejši rezultati."
+              },
+              {
+                "id": 12,
+                "q": "Kaj naredijo connectors v Cowork?",
+                "options": [
+                  "Pospešijo delovanje aplikacije",
+                  "Povežejo Cowork z cloud orodji, kjer tvoje delo dejansko živi",
+                  "Varnostno kopirajo datoteke",
+                  "Sinhronizirajo nastavitve med napravami"
+                ],
+                "correct": 1,
+                "explanation": "Connectors so most med Cowork in cloud orodji — e-pošta, cloud shramba, sporočila, CRM…"
+              },
+              {
+                "id": 13,
+                "q": "Kateri connectors večina uporabnikov nastavi najprej?",
+                "options": [
+                  "CRM in projektna orodja",
+                  "E-pošta in cloud shramba",
+                  "Brskalniška razširitev",
+                  "Varnostni certifikati"
+                ],
+                "correct": 1,
+                "explanation": "E-pošta in cloud shramba (Google Drive, SharePoint, Box) prinašata največ vrednosti za večino delovnih tokov."
+              },
+              {
+                "id": 14,
+                "q": "Kaj naredi Cowork v privzetem načinu dovoljenj ('Ask before acting')?",
+                "options": [
+                  "Nemudoma izvede vse ukaze brez potrditve",
+                  "Blokira vse akcije, dokler jih ročno ne odblokiraš",
+                  "Vpraša za dovoljenje pred vsakim dejanjem, ki ni branje ali pisanje v mapo",
+                  "Pošlje poročilo o vsakem dejanju po e-pošti"
+                ],
+                "correct": 2,
+                "explanation": "'Ask before acting' = Cowork se ustavi pred pošiljanjem, objavljanjem ali brisanjem in vpraša za zeleno luč."
+              },
+              {
+                "id": 15,
+                "q": "Pred katerim dejanjem Cowork VEDNO vpraša za dovoljenje, ne glede na nastavitev dovoljenj?",
+                "options": [
+                  "Pred branjem datotek",
+                  "Pred pisanjem dokumentov",
+                  "Pred trajnim brisanjem datotek",
+                  "Pred odpiranjem spletnih strani"
+                ],
+                "correct": 2,
+                "explanation": "Trajno brisanje je edina vgrajena izjema — Cowork vedno vpraša, brez možnosti izklopa."
+              },
+              {
+                "id": 16,
+                "q": "Kdaj je primerno preklopiti na 'Trust this session'?",
+                "options": [
+                  "Vedno, za hitrejše delovanje",
+                  "Ko aktivno spremljaš nalogo in zaupAš kontekstu",
+                  "Ko delaš z zaupnimi dokumenti",
+                  "Ko nimaš internetne povezave"
+                ],
+                "correct": 1,
+                "explanation": "'Trust this session' je za situacije, ko si prisoten/a in aktivno nadziraš potek naloge."
               }
             ]
           }
