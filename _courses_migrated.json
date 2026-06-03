@@ -3361,10 +3361,14 @@
           "Ločiti Chat, Cowork in Code ter vedeti, kdaj poseči po katerem",
           "Odpreti Cowork v Claude Desktop app in ga usmeriti na delovno mapo",
           "Dodati vsaj en connector",
-          "Prepoznati, kdaj Claude vpraša za dovoljenje — in kdaj ne — ter z zaupanjem predati nalogo"
+          "Prepoznati, kdaj Claude vpraša za dovoljenje — in kdaj ne — ter z zaupanjem predati nalogo",
+          "Prepoznati tri vzorce dela, ki ustrezajo Cowork: večkoračno, datotečno, multi-tool",
+          "Nastaviti Scheduled Task za ponavljajočo nalogo",
+          "Poslati nalogo s telefona z Dispatch"
         ],
         "reflections": [
-          "Pomisli na nalogo, ki si jo nedavno opravil/a, kjer je bila vrednost v izvedbi, ne le v razmišljanju.|Morda je zajemala več orodij ali se končala z rezultatom, ki si ga sestavil/a ročno. Drži se te naloge — vrneš se k njej v Lekciji 3 in 4."
+          "Pomisli na nalogo, ki si jo nedavno opravil/a, kjer je bila vrednost v izvedbi, ne le v razmišljanju.|Morda je zajemala več orodij ali se končala z rezultatom, ki si ga sestavil/a ročno. Drži se te naloge — vrneš se k njej v Lekciji 3 in 4.",
+          "Poglej na tedenski urnik in to-do list. Izberi eno nalogo, ki ustreza enemu ali več trem vzorcem — večkoračno, datotečno ali multi-tool. Zapiši jo.|V Lekciji 4 boš to nalogo delegiral/a Claudu od začetka do konca — od prvega prompta do dokončanega rezultata."
         ],
         "sections": [
           {
@@ -3830,6 +3834,267 @@
                 ],
                 "correct": 1,
                 "explanation": "'Trust this session' je za situacije, ko si prisoten/a in aktivno nadziraš potek naloge."
+              }
+            ]
+          },
+          {
+            "id": 3,
+            "lesson": "Lekcija 3",
+            "title": "What Claude Cowork can do for you",
+            "features": [
+              {
+                "id": 12,
+                "section_id": 3,
+                "name": "Vzorec 1: Večkoračna naloga",
+                "icon": "ti-stairs-up",
+                "badge_type": "when",
+                "badge_text": "Vzorec 1",
+                "short_desc": "Cowork je idealen, ko naloga zahteva zbiranje, sestavljanje, osnutek in formatiranje — v enem promptu",
+                "what_it_does": "Cowork razdeli nalogo na korake in jih izvede zaporedoma. Enkrat opišeš izid, Cowork naredi vse vmesne korake in vrne dokončan rezultat.",
+                "when_to_use": "Triage e-pošte s povzetki in kvotami po temah. Zbiranje podatkov iz treh poročil in sestavljanje v en dashboard.",
+                "when_not": "Za nalogo z enim korakom ali enim vprašanjem je Chat hitrejši in preprostejši.",
+                "why_it_matters": "Večkoračne naloge so točno tisto, za kar je Cowork zasnovan — ti delegiraš celoten tok, ne samo en korak.",
+                "sort_order": 1
+              },
+              {
+                "id": 13,
+                "section_id": 3,
+                "name": "Vzorec 2: Naloga živi v datotekah",
+                "icon": "ti-file-text",
+                "badge_type": "when",
+                "badge_text": "Vzorec 2",
+                "short_desc": "Cowork dela na resničnih datotekah — ureja, dopolnjuje in shranjuje nazaj v tvojo mapo",
+                "what_it_does": "Claude prebere datoteke v tvoji mapi, dela na njih in shranjuje dokončane rezultate v isto mapo. Word, Excel, PDF, PowerPoint — karkoli je v mapi.",
+                "when_to_use": "Oblikovan predlog stranke iz predloge in zapisnikov sestanka. Mesečno poročilo o metrikah iz surovih preglednic z grafikoni.",
+                "when_not": "Chat je boljši za hitro ustvarjanje novega dokumenta iz nič, brez obstoječih datotek.",
+                "why_it_matters": "Cowork ne ustvari novega dokumenta — dela na datotekah, ki jih imaš. To je razlika med 'ustvari' in 'opravi'.",
+                "sort_order": 2
+              },
+              {
+                "id": 14,
+                "section_id": 3,
+                "name": "Vzorec 3: Naloga sega v več orodij",
+                "icon": "ti-arrows-join",
+                "badge_type": "when",
+                "badge_text": "Vzorec 3",
+                "short_desc": "Cowork poveže Gmail, Slack, preglednico in CRM — in izvede celoten tok kot eno delegiranje",
+                "what_it_does": "Claude dostopa do tvojih connectors (Gmail, Slack, Outlook, CRM…), zbira vsebino iz vseh virov in izvede celoten tok kot eno nalogo. Brez ročnega kopiranja med orodji.",
+                "when_to_use": "Follow-up e-poštna sporočila po sestanku na podlagi zapisnikov in Slack zgodovine. Sinteza vsega, kar je ekipa rekla o lansiranju.",
+                "when_not": "Če naloga sega samo v eno orodje, je morda Chat dovolj — Cowork je za tokove čez več sistemov hkrati.",
+                "why_it_matters": "Namesto da sam/a sestavljaš kose iz različnih aplikacij, Cowork to stori za tebe v enem koraku — to je pravi pomen delegiranja.",
+                "sort_order": 3
+              },
+              {
+                "id": 15,
+                "section_id": 3,
+                "name": "Scheduled Tasks",
+                "icon": "ti-clock",
+                "badge_type": "when",
+                "badge_text": "Avtomatizacija",
+                "short_desc": "Scheduled Tasks pustijo Claudu, da nalogo izvede po urniku — brez tvojega posredovanja",
+                "what_it_does": "Nalogo opišeš enkrat, nastaviš urnik (dnevno, tedensko, mesečno…), in Cowork jo izvaja samodejno. Dva načina: tipkaš 'schedule' ali nalogo najprej enkrat izvedeš in jo shraniš kot ponavljajočo.",
+                "when_to_use": "Petkovo poročilo o tem, kaj se je dostavilo ta teden. Mesečni roll-up metrik. Jutranje povzetki sestankov z email kontekstom.",
+                "when_not": "Scheduled Tasks tečejo samo, ko je tvoj računalnik vklopljen in Cowork odprt — ni oblačne izvedbe brez namizja.",
+                "why_it_matters": "Naloge, ki jih ponavljaš vsak teden, Cowork naredi namesto tebe — brez da sploh pomisliš nanje.",
+                "sort_order": 4
+              },
+              {
+                "id": 16,
+                "section_id": 3,
+                "name": "Dispatch",
+                "icon": "ti-device-mobile",
+                "badge_type": "when",
+                "badge_text": "Mobilno",
+                "short_desc": "Dispatch: delegiraj Cowork nalogo s telefona, rezultat pride na namizje",
+                "what_it_does": "V Claude mobilni app dodeliš nalogo svojemu namizju — iste datoteke, isti connectors, ista dovoljenja. Ko je naloga končana, dobiš push obvestilo. Delo se izvede na namizju, ne na telefonu.",
+                "when_to_use": "Ko si od mize in si spomniš na nalogo, ki jo hočeš delegirati. 'Pripravi povzetek sestanka' — medtem ko si na poti.",
+                "when_not": "Dispatch deluje samo, ko je namizje vklopljeno in Cowork odprt. Zahteva Pro ali Max plan (ali Enterprise z IT odobritvijo).",
+                "why_it_matters": "Tvoj Cowork delovni tok ni omejen na pisarno — naloge začneš kadarkoli in kjerkoli, namizje jih izpelje.",
+                "sort_order": 5
+              },
+              {
+                "id": 17,
+                "section_id": 3,
+                "name": "Prepoznaj svoje Cowork naloge",
+                "icon": "ti-eye",
+                "badge_type": "when",
+                "badge_text": "Refleksija",
+                "short_desc": "Trije vzorci skupaj so tvoj filter: večkoračno, datotečno ali multi-tool — to so tvoje Cowork naloge",
+                "what_it_does": "Ko pregledaš urnik ali to-do list, si za vsako nalogo postavi: Je večkoračna? Živi v datotekah? Sega v več orodij? Eno ujemanje zadostuje.",
+                "when_to_use": "Vsak teden — ko pregledaš urnik in naloge, vprašaj: 'Katero od tega bi Cowork opravil namesto mene?'",
+                "when_not": "Ne sili vsake naloge v Cowork. Hitra vprašanja, kratki odgovori, osnutki brez konteksta — to ostane v Chatu.",
+                "why_it_matters": "Ta filter je most med 'razumem Cowork' in 'Cowork dejansko prihrani moj čas'.",
+                "sort_order": 6
+              }
+            ],
+            "notes": [
+              {
+                "id": 15,
+                "section_id": 3,
+                "note_type": "desc",
+                "content": "Ne vsaka naloga je primerna za Cowork — in to je v redu. Trije vzorci ti pokažejo, kdaj je Cowork prava izbira: naloge z več koraki, naloge ki živijo v datotekah in naloge ki segajo v več orodij. Ko naloga ustreza enemu od teh vzorcev, jo delegiraj.",
+                "sort_order": -2
+              },
+              {
+                "id": 16,
+                "section_id": 3,
+                "note_type": "tip",
+                "content": "Filter za vsako nalogo: je večkoračna, datotečna ali multi-tool? Eno ujemanje zadostuje za delegiranje Claudu.",
+                "sort_order": -1
+              },
+              {
+                "id": 17,
+                "section_id": 3,
+                "note_type": "subsection-header",
+                "content": "Trije vzorci dela, ki ustrezajo Cowork",
+                "sort_order": 10
+              },
+              {
+                "id": 18,
+                "section_id": 3,
+                "note_type": "desc",
+                "content": "Vzorec 1 — večkoračno: zbiranje, sestavljanje, formatiranje v enem promptu. Vzorec 2 — datotečno: Claude dela na obstoječih datotekah v tvoji mapi in shranjuje rezultate nazaj. Vzorec 3 — multi-tool: Cowork poveže connectors (Gmail, Slack, Drive…) in izvede celoten tok kot eno delegiranje.",
+                "sort_order": 11
+              },
+              {
+                "id": 19,
+                "section_id": 3,
+                "note_type": "subsection-header",
+                "content": "Scheduled Tasks",
+                "sort_order": 20
+              },
+              {
+                "id": 20,
+                "section_id": 3,
+                "note_type": "youtube",
+                "content": "ntWZqHF78",
+                "sort_order": 21
+              },
+              {
+                "id": 21,
+                "section_id": 3,
+                "note_type": "desc",
+                "content": "Nalogo opišeš enkrat, nastaviš urnik in Cowork jo izvaja samodejno. Dva načina: tipkaš 'schedule' takoj, ali nalogo najprej enkrat izvedeš in jo shraniš kot ponavljajočo. Cowork tečejo samo, ko je namizje vklopljeno in Cowork odprt.",
+                "sort_order": 22
+              },
+              {
+                "id": 22,
+                "section_id": 3,
+                "note_type": "subsection-header",
+                "content": "Dispatch",
+                "sort_order": 30
+              },
+              {
+                "id": 23,
+                "section_id": 3,
+                "note_type": "youtube",
+                "content": "fVIV-L49eBs",
+                "sort_order": 31
+              },
+              {
+                "id": 24,
+                "section_id": 3,
+                "note_type": "warning",
+                "content": "Dispatch deluje samo, ko je namizje vklopljeno in Cowork odprt. Trenutno na voljo za Pro in Max plan; Enterprise zahteva IT odobritev.",
+                "sort_order": 32
+              }
+            ],
+            "questions": [
+              {
+                "id": 17,
+                "q": "Kateri od naslednjih primerov je tipičen Vzorec 1 (večkoračna) naloga za Cowork?",
+                "options": [
+                  "Odgovori na eno e-poštno sporočilo",
+                  "Triage tedna e-pošte s povzetki in kvotami po temah",
+                  "Prevedi en odstavek",
+                  "Poišči datum v dokumentu"
+                ],
+                "correct": 1,
+                "explanation": "Vzorec 1 so naloge, ki zahtevajo več korakov — zbiranje, analizo, formatiranje — vse v enem promptu."
+              },
+              {
+                "id": 18,
+                "q": "Kaj pomeni, da je naloga 'datotečna' (Vzorec 2)?",
+                "options": [
+                  "Naloga zahteva prenašanje datotek v oblak",
+                  "Izhod naloge je artefakt (Word, Excel, PDF…) in Claude dela na obstoječih datotekah v mapi",
+                  "Naloga vključuje samo branje dokumentov",
+                  "Claude ustvari novo datoteko brez obstoječega konteksta"
+                ],
+                "correct": 1,
+                "explanation": "Vzorec 2 pomeni, da Claude dela na datotekah ki jih že imaš — prebere jih, jih uredi in shrani rezultat nazaj v mapo."
+              },
+              {
+                "id": 19,
+                "q": "V čem se Vzorec 3 (multi-tool) razlikuje od dela v eni aplikaciji?",
+                "options": [
+                  "Vzorec 3 je hitrejši",
+                  "Cowork poveže več connectors in izvede celoten tok čez njih kot eno delegiranje",
+                  "Vzorec 3 zahteva ročno kopiranje med orodji",
+                  "Vzorec 3 je samo za razvijalce"
+                ],
+                "correct": 1,
+                "explanation": "Vzorec 3 pomeni, da Cowork dostopa do Gmail, Slack, CRM in drugih connectors hkrati — brez ročnega kopiranja med njimi."
+              },
+              {
+                "id": 20,
+                "q": "Katera od teh nalog NI primerna za Cowork (ne ustreza nobenemu vzorcu)?",
+                "options": [
+                  "Mesečno poročilo iz surovih preglednic",
+                  "Follow-up e-poštna sporočila po sestanku na podlagi zapisnikov in Slack",
+                  "Kratko vprašanje z enim odgovorom",
+                  "Triage tedna e-pošte po temah"
+                ],
+                "correct": 2,
+                "explanation": "Kratka vprašanja z enim odgovorom so za Chat — Cowork je za naloge ki so večkoračne, datotečne ali multi-tool."
+              },
+              {
+                "id": 21,
+                "q": "Kako nastaviš Scheduled Task v Cowork?",
+                "options": [
+                  "V nastavitvah aplikacije pod 'Automation'",
+                  "Nalogo opišeš in tipkaš 'schedule', ali jo najprej enkrat izvedeš in jo shranIš kot ponavljajočo",
+                  "Prek spletne nadzorne plošče v brskalniku",
+                  "Z nastavitvijo sistemskega opravila v operacijskem sistemu"
+                ],
+                "correct": 1,
+                "explanation": "Dva načina: tipkaš 'schedule' in opišeš nalogo ter urnik, ali nalogo enkrat izvedeš in jo nato shraniš kot ponavljajočo."
+              },
+              {
+                "id": 22,
+                "q": "Kdaj Scheduled Task dejansko teče?",
+                "options": [
+                  "Kadar koli, tudi ko je računalnik ugasnjen",
+                  "Samo v oblaku, neodvisno od namizja",
+                  "Samo ko je računalnik vklopljen in Cowork odprt",
+                  "Ob vsaki prijavi v Claude"
+                ],
+                "correct": 2,
+                "explanation": "Scheduled Tasks so vezani na namizje — tečejo samo ko je računalnik vklopljen in Cowork odprt. Brez oblačne izvedbe."
+              },
+              {
+                "id": 23,
+                "q": "Kaj je Dispatch?",
+                "options": [
+                  "Orodje za hitrejše pošiljanje e-pošte",
+                  "Funkcija, ki ti omogoča delegirati Cowork nalogo s telefona, ki se izvede na namizju",
+                  "Sistem za samodejno varnostno kopiranje datotek",
+                  "Nastavitev dovoljenj za deljenje z ekipo"
+                ],
+                "correct": 1,
+                "explanation": "Dispatch ti omogoča, da v mobilni Claude app dodeliš nalogo svojemu namizju — iste datoteke, isti connectors, rezultat pride ko je namizje spet dostopno."
+              },
+              {
+                "id": 24,
+                "q": "Kaj je pogoj za delovanje Dispatch?",
+                "options": [
+                  "Internetna povezava na telefonu",
+                  "Namizje mora biti vklopljeno in Cowork odprt; zahteva Pro ali Max plan",
+                  "Posebna nastavitev v oblačnem računu",
+                  "Brezplačen plan zadostuje"
+                ],
+                "correct": 1,
+                "explanation": "Dispatch deluje samo ko je namizje vklopljeno in Cowork odprt. Na voljo je za Pro in Max plan; Enterprise zahteva IT odobritev."
               }
             ]
           }
