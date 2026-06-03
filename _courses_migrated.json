@@ -3364,7 +3364,10 @@
           "Prepoznati, kdaj Claude vpraša za dovoljenje — in kdaj ne — ter z zaupanjem predati nalogo",
           "Prepoznati tri vzorce dela, ki ustrezajo Cowork: večkoračno, datotečno, multi-tool",
           "Nastaviti Scheduled Task za ponavljajočo nalogo",
-          "Poslati nalogo s telefona z Dispatch"
+          "Poslati nalogo s telefona z Dispatch",
+          "Sestaviti Cowork prompt z rezultatom, vhodi in nuancami",
+          "Odgovoriti na pojasnilna vprašanja Cowork-a na način, ki izboljša izhod",
+          "Usmeriti nalogo med izvajanjem in pregledati dokončan rezultat z izklopljenim zaupanjem"
         ],
         "reflections": [
           "Pomisli na nalogo, ki si jo nedavno opravil/a, kjer je bila vrednost v izvedbi, ne le v razmišljanju.|Morda je zajemala več orodij ali se končala z rezultatom, ki si ga sestavil/a ročno. Drži se te naloge — vrneš se k njej v Lekciji 3 in 4.",
@@ -4095,6 +4098,253 @@
                 ],
                 "correct": 1,
                 "explanation": "Dispatch deluje samo ko je namizje vklopljeno in Cowork odprt. Na voljo je za Pro in Max plan; Enterprise zahteva IT odobritev."
+              }
+            ]
+          },
+          {
+            "id": 4,
+            "lesson": "Lekcija 4",
+            "title": "Hand Claude Cowork your first task",
+            "features": [
+              {
+                "id": 18,
+                "section_id": 4,
+                "name": "Sestavi dober prompt",
+                "icon": "ti-pencil",
+                "badge_type": "when",
+                "badge_text": "Korak 1",
+                "short_desc": "Dober Cowork prompt imenuje rezultat, vhode in nuance — Cowork naredi ostalo",
+                "what_it_does": "Tri komponente: 1. Rezultat — kaj točno hočeš (format, dolžina, struktura). 2. Vhodi — katera mapa, kateri kanali, kakšen časovni obseg. 3. Nuance — specifičnosti in kontekst, ki ga Claude ne bi uganil sam.",
+                "when_to_use": "Vsakič ko delegiraš Cowork nalogo — od prve do tisočte.",
+                "when_not": "Ne pusti polja prazna v upanju, da bo Claude uganil — prazna polja bo Cowork zapolnil z vprašanji, kar je v redu, ampak bolje je podati kontekst takoj.",
+                "why_it_matters": "Boljši prompt = manj povratnih vprašanj, boljši rezultat. Naložba v prompt se povrne v kakovosti izhoda.",
+                "sort_order": 1
+              },
+              {
+                "id": 19,
+                "section_id": 4,
+                "name": "Odgovori na pojasnilna vprašanja",
+                "icon": "ti-message-question",
+                "badge_type": "when",
+                "badge_text": "Korak 2",
+                "short_desc": "Cowork vpraša preden se loti dela — s tem zapolni vrzeli, ki bi pokvarile rezultat",
+                "what_it_does": "Za večino vprašanj Claude ponudi možnosti — klikneš tisto, ki ustreza. Če nobena ne ustreza, odgovoriš z lastnimi besedami. Vprašanja pokrivajo točno to, kar bi pokvarilo rezultat, če bi ostalo neodgovorjeno.",
+                "when_to_use": "Ko Cowork postavi vprašanje — odgovori natančno. To je zadnja priložnost pred začetkom izvedbe.",
+                "when_not": "Ne preskaki vprašanj. Nejasni ali površni odgovori vodijo v nejasne ali površne rezultate.",
+                "why_it_matters": "V Chatu se kontekst gradi po korakih. V Cowork se zgradi pred začetkom — pojasnilna vprašanja so ta gradnik.",
+                "sort_order": 2
+              },
+              {
+                "id": 20,
+                "section_id": 4,
+                "name": "Usmeri nalogo med izvajanjem",
+                "icon": "ti-steering-wheel",
+                "badge_type": "when",
+                "badge_text": "Korak 3",
+                "short_desc": "Če Cowork gre v napačno smer — prekini in usmeri takoj. Ne čakaj na konec.",
+                "what_it_does": "Cowork sproti kaže načrt in napredek. Ko opaziš napačen vir, napačen ton ali napačen format — prekini, pojasni in nadaljuj. Strošek preusmeritve je nizek: Cowork je zasnovan za to.",
+                "when_to_use": "Ko opaziš, da Cowork dela v napačni smeri — napačen vir, napačen ton, napačen format. Prej, bolje.",
+                "when_not": "Ni treba prekiniti pri vsaki manjši odločitvi — usmerjaj le, ko se Cowork oddaljuje od tvojega cilja.",
+                "why_it_matters": "Cowork je zasnovan za preusmeritve. Prej prekineš, manj dela se zavrže — to ni Chat, kjer čakaš na konec odgovora.",
+                "sort_order": 3
+              },
+              {
+                "id": 21,
+                "section_id": 4,
+                "name": "Pregledaj dokončan rezultat",
+                "icon": "ti-zoom-check",
+                "badge_type": "when",
+                "badge_text": "Korak 4",
+                "short_desc": "Rezultat pregledaj z izklopljenim zaupanjem — preveri cilj, natančnost in morebitne izmišljotine",
+                "what_it_does": "Tri stvari za preveriti: 1. Ali ustreza cilju? 2. Je vsebina točna — spot check Claude-ove sinteze z izvornim materialom. 3. Ni ničesar izmišljenega — datum, metrika ali citat brez sledljivega vira je opozorilo, ne lastnost.",
+                "when_to_use": "Vsakič ko Cowork dostavi rezultat — posebej prvih nekajkrat.",
+                "when_not": "Ne preverjaj vsakega stavka ročno — spot check ključnih trditev zadostuje za zaupanje vredne rezultate.",
+                "why_it_matters": "Cowork naredi ogromno dela — tvoje prepoznavanje napak je zadnji filter pred dostavo. Discernment ostaja tvoj.",
+                "sort_order": 4
+              },
+              {
+                "id": 22,
+                "section_id": 4,
+                "name": "Iteriraj, ne začni znova",
+                "icon": "ti-refresh",
+                "badge_type": "when",
+                "badge_text": "Iteracija",
+                "short_desc": "Če je osnutek večinoma dober — povej Claudu, kaj spremeniti. Iteracija je hitrejša od ponovne generacije.",
+                "what_it_does": "Cowork si zapomni pogovor. Povej mu specifično, kaj spremeniti — iterira hitreje, kot bi regeneriral celoten dokument. Če je napaka v smeri (manjka kontekst), popravi prompt in pokažI Claudu nov kontekst.",
+                "when_to_use": "Ko je osnutek večinoma dober, a rabi popravke. Ko je napaka v enem delu, ne v celoti.",
+                "when_not": "Če je osnutek fundamentalno napačen — manjka ključni kontekst — je bolje posodobiti prompt in začeti znova.",
+                "why_it_matters": "Iteracija je hitra. Cowork si zapomni celoten pogovor in pogosto iterira hitreje, kot bi regeneriral dokument od začetka.",
+                "sort_order": 5
+              },
+              {
+                "id": 23,
+                "section_id": 4,
+                "name": "Cikel delegiranja",
+                "icon": "ti-rotate-clockwise",
+                "badge_type": "when",
+                "badge_text": "Vzorec",
+                "short_desc": "Prompt → vprašanja → izvajanje → pregled → iteracija: to je en cikel Cowork delegiranja",
+                "what_it_does": "Vsaka Cowork naloga gre skozi ta cikel: sestaviš prompt, odgovoriš na vprašanja, Cowork izvaja (usmerjaš po potrebi), pregledaš rezultat, iteriraš. Cikel postane bolj gladek z vsakim naslednjim delegiranjem.",
+                "when_to_use": "Za vsako Cowork nalogo — od prve do tisočte.",
+                "when_not": "Enostavnejše naloge gredo hitreje skozi cikel, a cikel je vseeno tam.",
+                "why_it_matters": "Ko enkrat razumeš cikel, vsako delegiranje postane bolj naravno. Naučiš se, kje naložiti kontekst in kje zaupati Claudu.",
+                "sort_order": 6
+              }
+            ],
+            "notes": [
+              {
+                "id": 25,
+                "section_id": 4,
+                "note_type": "youtube",
+                "content": "Lbml7IuGJYw",
+                "sort_order": -3
+              },
+              {
+                "id": 26,
+                "section_id": 4,
+                "note_type": "desc",
+                "content": "Prišel je čas: nalogo, ki si jo zapisal/a v Lekciji 3, zdaj predaš Claudu. Ta lekcija te vodi skozi celoten cikel — od prvega prompta do pregledanega rezultata.",
+                "sort_order": -2
+              },
+              {
+                "id": 27,
+                "section_id": 4,
+                "note_type": "tip",
+                "content": "Pusti polje prazno in Cowork te bo sam vprašal — ampak boljše je podati kontekst takoj. Vsak nepodani podatek postane vprašanje, vsako vprašanje je zamuda.",
+                "sort_order": -1
+              },
+              {
+                "id": 28,
+                "section_id": 4,
+                "note_type": "subsection-header",
+                "content": "Sestavi dober prompt",
+                "sort_order": 10
+              },
+              {
+                "id": 29,
+                "section_id": 4,
+                "note_type": "desc",
+                "content": "Dober Cowork prompt ima tri dele: rezultat (kaj točno hočeš, v kakšnem formatu in dolžini), vhodi (katera mapa, kateri kanali, kateri časovni obseg), in nuance (specifičnosti ali kontekst, ki ga Claude ne bi uganil sam — ton, omejitve, tvoja ekspertiza).",
+                "sort_order": 11
+              },
+              {
+                "id": 30,
+                "section_id": 4,
+                "note_type": "subsection-header",
+                "content": "Usmeri in pregledaj",
+                "sort_order": 20
+              },
+              {
+                "id": 31,
+                "section_id": 4,
+                "note_type": "desc",
+                "content": "Med izvajanjem Cowork kaže načrt in napredek — prekini in usmeri, kakor hitro opaziš napačno smer. Ko je naloga končana, je rezultat v aplikaciji in v tvoji mapi. Pregledaj z izklopljenim zaupanjem: ali ustreza cilju, je vsebina točna, ni ničesar izmišljenega.",
+                "sort_order": 21
+              },
+              {
+                "id": 32,
+                "section_id": 4,
+                "note_type": "tip",
+                "content": "Če je osnutek večinoma dober — iteriraj, ne začni znova. Cowork si zapomni pogovor in iterira hitreje, kot bi regeneriral celoten dokument.",
+                "sort_order": 22
+              }
+            ],
+            "questions": [
+              {
+                "id": 25,
+                "q": "Kateri trije elementi tvorijo dober Cowork prompt?",
+                "options": [
+                  "Naslov, datum in ime avtorja",
+                  "Rezultat, vhodi in nuance",
+                  "Vprašanje, odgovor in povzetek",
+                  "Format, dolžina in jezik"
+                ],
+                "correct": 1,
+                "explanation": "Dober Cowork prompt imenuje rezultat (kaj hočeš in v kakšnem formatu), vhode (katere datoteke/kanale/obseg) in nuance (specifičnosti, ki jih Claude ne bi uganil sam)."
+              },
+              {
+                "id": 26,
+                "q": "Kaj se zgodi, če v promptu pustiš pomembno polje prazno?",
+                "options": [
+                  "Cowork nalogo zavrne",
+                  "Cowork ugane in nadaljuje brez vprašanja",
+                  "Cowork te vpraša o tem preden začne z delom",
+                  "Cowork uporabi zadnje znane nastavitve"
+                ],
+                "correct": 2,
+                "explanation": "Prazna polja Cowork zapolni z vprašanji — to je v redu, ampak bolje je podati kontekst takoj in prihraniti čas."
+              },
+              {
+                "id": 27,
+                "q": "Zakaj Cowork postavlja pojasnilna vprašanja pred začetkom dela?",
+                "options": [
+                  "Da preveri tvojo identiteto",
+                  "Da zapolni vrzeli v razumevanju, ki bi pokvarile rezultat",
+                  "Da ustvari varnostno kopijo nastavitev",
+                  "Da oceni težavnost naloge"
+                ],
+                "correct": 1,
+                "explanation": "V Cowork se ves kontekst zgradi pred začetkom — pojasnilna vprašanja zapolnijo vrzeli, ki bi pokvarile rezultat, namesto da se rešujejo po korakih kot v Chatu."
+              },
+              {
+                "id": 28,
+                "q": "Kaj storiš, ko Cowork med izvajanjem gre v napačno smer?",
+                "options": [
+                  "Počakaš, da konča, in nato začneš znova od začetka",
+                  "Nič — Cowork se bo sam popravil",
+                  "Prekineš takoj in ga usmeriš v pravo smer",
+                  "Zapeneš aplikacijo in jo znova odpreš"
+                ],
+                "correct": 2,
+                "explanation": "Cowork je zasnovan za preusmeritve — strošek prekinitve je nizek. Prej prekineš, manj dela se zavrže."
+              },
+              {
+                "id": 29,
+                "q": "Kje najdeš dokončan rezultat Cowork naloge?",
+                "options": [
+                  "Samo v oblačnem shranjevanju Anthropic",
+                  "V e-poštnem sporočilu, ki ga Cowork pošlje",
+                  "V aplikaciji in v delovni mapi na tvojem računalniku",
+                  "V zgodovini pogovorov v Claude chat"
+                ],
+                "correct": 2,
+                "explanation": "Cowork shrani rezultat v tvojo delovno mapo na računalniku — datoteko odpreš in uporabiš neposredno."
+              },
+              {
+                "id": 30,
+                "q": "Katero od teh NI priporočen način pregledovanja Cowork rezultata?",
+                "options": [
+                  "Preveriti, ali rezultat ustreza prvotnemu cilju",
+                  "Spot check ključnih trditev z izvornim materialom",
+                  "Zaupati vsemu, kar je Cowork napisal, brez preverjanja",
+                  "Preveriti, ali ni datumov, metrik ali citatov brez sledljivega vira"
+                ],
+                "correct": 2,
+                "explanation": "Rezultat pregledaš z izklopljenim zaupanjem — Cowork je zmogljiv, a vsebino je treba spot checkati, posebej prvih nekajkrat."
+              },
+              {
+                "id": 31,
+                "q": "Kdaj je bolje iterirati obstoječi osnutek, namesto začeti znova?",
+                "options": [
+                  "Nikoli — vedno je bolje začeti znova",
+                  "Ko je osnutek večinoma dober, a rabi specifične popravke",
+                  "Ko je osnovna smer fundamentalno napačna",
+                  "Ko manjka ključni kontekst v promptu"
+                ],
+                "correct": 1,
+                "explanation": "Cowork si zapomni pogovor in iterira hitreje, kot bi regeneriral celoten dokument. Iteriraj, ko je osnova dobra; začni znova, ko manjka ključni kontekst."
+              },
+              {
+                "id": 32,
+                "q": "Kateri je pravilen vrstni red korakov v ciklu Cowork delegiranja?",
+                "options": [
+                  "Vprašanja → prompt → izvajanje → iteracija → pregled",
+                  "Izvajanje → prompt → pregled → vprašanja → iteracija",
+                  "Prompt → vprašanja → izvajanje → pregled → iteracija",
+                  "Pregled → prompt → vprašanja → iteracija → izvajanje"
+                ],
+                "correct": 2,
+                "explanation": "Cikel: najprej sestaviš prompt, Cowork postavi vprašanja, izvaja nalogo (usmerjaš po potrebi), pregledaš rezultat, iteriraš po potrebi."
               }
             ]
           }
