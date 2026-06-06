@@ -53,9 +53,6 @@ ID-ji unikatni **znotraj kurza** (slug loči kurze).
 - Po implementaciji: **programska verifikacija** (JSON valid, ID-ji unikatni, render deluje) pred zaključkom.
 - Vsaka nova lekcija **mora** dobiti `questions` (5–10 vprašanj).
 
-## Session start
-Ob zagonu preberi `PROJECT_STATUS.md` in povej kratko stanje projekta.
-
 ## 4. Okolje
 
 - **OS:** Windows · terminal: CMD · deployment: GitHub Desktop
