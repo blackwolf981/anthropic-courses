@@ -878,37 +878,39 @@ function getSection() {
   if (!currentSectionId) return null;
   return getChapter().sections.find(s => s.id === currentSectionId);
 }
+function lessonNum(lesson) {
+  if (typeof lesson === 'number') return lesson;
+  const m = String(lesson).match(/\d+/);
+  return m ? parseInt(m[0], 10) : lesson;
+}
 
 /* ── Navigation ─────────────────────────────────────────────────── */
 function goToCourse(id) {
-  currentCourseId      = id;
-  currentChapterId     = getCourse().chapters[0].id;
-  currentSectionId     = null;
-  selectedFeatureId    = null;
-  quiz                 = null;
-  courseDropdownOpen   = false;
-  chapterDropdownOpen  = false;
+  currentCourseId   = id;
+  currentChapterId  = getCourse().chapters[0].id;
+  currentSectionId  = null;
+  selectedFeatureId = null;
+  quiz              = null;
+  closeDropdownsState();
   closePicker();
   render();
 }
 
 function goToChapter(id) {
-  currentChapterId     = id;
-  currentSectionId     = null;
-  selectedFeatureId    = null;
-  quiz                 = null;
-  courseDropdownOpen   = false;
-  chapterDropdownOpen  = false;
+  currentChapterId  = id;
+  currentSectionId  = null;
+  selectedFeatureId = null;
+  quiz              = null;
+  closeDropdownsState();
   render();
 }
 
 function goToLesson(chId, secId) {
-  currentChapterId     = chId;
-  currentSectionId     = secId;
-  selectedFeatureId    = null;
-  quiz                 = null;
-  courseDropdownOpen   = false;
-  chapterDropdownOpen  = false;
+  currentChapterId  = chId;
+  currentSectionId  = secId;
+  selectedFeatureId = null;
+  quiz              = null;
+  closeDropdownsState();
   closeDrawer();
   render();
   window.scrollTo(0, 0);
@@ -977,11 +979,16 @@ function toggleChapterDropdown() {
   render();
 }
 
-function closeLessonDropdowns() {
-  if (!courseDropdownOpen && !chapterDropdownOpen) return;
+function closeDropdownsState() {
   courseDropdownOpen  = false;
   chapterDropdownOpen = false;
-  document.getElementById('lh-backdrop').classList.remove('open');
+  const bd = document.getElementById('lh-backdrop');
+  if (bd) bd.classList.remove('open');
+}
+
+function closeLessonDropdowns() {
+  if (!courseDropdownOpen && !chapterDropdownOpen) return;
+  closeDropdownsState();
   render();
 }
 
@@ -1182,7 +1189,7 @@ function renderLessonHeader() {
       const sParts = s.title.split(':');
       const sName = sParts.length > 1 ? sParts.slice(1).join(':').trim() : s.title.trim();
       return `<div class="lh-dropdown-item${isActive ? ' active' : ''}" onclick="goToLesson(${ch.id}, ${s.id})">
-        <span class="num">L${s.lesson}</span>
+        <span class="num">L${lessonNum(s.lesson)}</span>
         <span class="lh-item-title">${sName}</span>
         ${isActive ? '<span class="dot"></span>' : ''}
       </div>`;
@@ -1201,7 +1208,7 @@ function renderLessonHeader() {
     </div>
     ${chDropHtml}
     <div class="lh-lesson">
-      <span class="l-num">L${sec.lesson}:</span>${lessonName}
+      <span class="l-num">L${lessonNum(sec.lesson)}:</span>${lessonName}
     </div>
     <div class="lh-progress">
       <div class="lh-progress-bar">

@@ -1,5 +1,5 @@
 # PROJECT_STATUS.md
-_Zadnja posodobitev: 2026-06-07_
+_Zadnja posodobitev: 2026-06-08_
 
 ## Projekt
 **anthropic-courses** · single HTML file (`index.html`) · mobile-first · multi-kurs
@@ -26,14 +26,14 @@ Repo: `C:\Users\andre\OneDrive\Documents\GitHub\anthropic-courses`
 |----------|------|-----------|-----------|-------------|
 | `index.html` | ✓ | ✓ | terminal piše, app bere | 2026-06-07 |
 | `CLAUDE.md` | ✓ | ✓ | ročno, oba bereta | 2026-06-05 |
-| `html-design-skill.md` | ✓ | ✓ | terminal piše, app bere | 2026-06-07 |
+| `html-design-skill.md` | ✓ | ✓ | terminal piše, app bere | 2026-06-08 |
 | `PROJECT_STATUS.md` | ✓ | ✓ | oba pišeta, oba bereta | 2026-06-07 |
 | `project-status-skill.md` | ✓ | — | app predlaga, terminal shrani | 2026-06-05 |
 | `handoff-skill.md` | ✓ | — | app predlaga, terminal shrani | 2026-06-05 |
 
 > ⚠️ Če datum v knowledge ne ujema z datumom v repo — uploadaj svežo verzijo.
 
-## Zadnja seja (2026-06-07, terminal)
+## Zadnja seja (2026-06-08, terminal)
 - Implementirali Cowork Ch3 "Use Claude wherever you work" (L9 + L10)
 - L9: Claude in Chrome (YT: IypXvHej9eY) — 6 features, 8 notes, 8 questions
 - L10: Claude for Microsoft 365 (YT: F6dzjaBCBtU) — 6 features, 8 notes, 8 questions
@@ -44,6 +44,10 @@ Repo: `C:\Users\andre\OneDrive\Documents\GitHub\anthropic-courses`
   - Dva dropdowna za navigacijo (poglavja / lekcije)
   - lesson-mode body class skrije fiksni header v lesson view
 - Posodobili html-design-skill.md — dodana sekcija "Lesson header (sticky top)"
+- Popravljeni 2 buga v lesson headerju (HANDOFF_2026-06-07_header_bugfixes.md)
+  - Bug 1: "LLekcija" double prefix → lessonNum() helper
+  - Bug 2: backdrop ostal open po dropdown navigaciji → closeDropdownsState() helper
+- Dodana "Lesson number helper" subsekcija v html-design-skill.md
 
 ## Next
 - [ ] Definiraj vsebino Poglavja 4 za Cowork kurs (v naslednji seji)

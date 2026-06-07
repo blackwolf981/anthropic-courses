@@ -398,6 +398,20 @@ const parts = sec.title.split(':');
 const lessonName = parts.length > 1 ? parts.slice(1).join(':').trim() : sec.title.trim();
 ```
 
+#### Lesson number helper
+
+Polje `sec.lesson` je historično nekonzistentno — string `"Lekcija 1"` za L1–L8, številka `9` za L9+. Vedno uporabljaj helper da se izogneš "LLekcija 1" double prefix:
+
+```javascript
+function lessonNum(lesson) {
+  if (typeof lesson === 'number') return lesson;
+  const m = String(lesson).match(/\d+/);
+  return m ? parseInt(m[0], 10) : lesson;
+}
+```
+
+Uporabi: `L${lessonNum(sec.lesson)}:` in `L${lessonNum(s.lesson)}` — nikoli direktno `L${sec.lesson}`.
+
 #### Mobile-first checklist
 
 - [x] Touch targeti ≥ 44px za klikabilne vrstice (`.lh-course`, `.lh-dropdown-item`)
