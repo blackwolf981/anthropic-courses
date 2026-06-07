@@ -250,6 +250,163 @@ COURSES (array)
 
 ## Komponente
 
+### Lesson header (sticky top)
+
+Header prikazuje celoten navigacijski kontekst lekcije: kurs → poglavje → lekcija. Dva dropdowna omogočata hitro navigacijo med poglavji in lekcijami brez odpiranja Content drawerja.
+
+```
+┌─────────────────────────────────────────┐
+│ [naslov kursa]              ˅           │  ← 14px/500, klik → dropdown poglavij
+│ [naslov poglavja] (Ch. N)   ˅           │  ← 11px, klik → dropdown lekcij
+│ L[N]: [naslov lekcije]                  │  ← 16px/500
+│ ████████░░░░  Ch. X/N · Lek. Y/M        │  ← 2px progress + label
+└─────────────────────────────────────────┘
+```
+
+#### CSS
+
+```css
+.lesson-header {
+  position: sticky; top: 0; z-index: 40;
+  background: var(--bg);
+  padding: 12px 16px 0;
+  border-bottom: 0.5px solid var(--border-md);
+}
+
+.lh-course {
+  font-size: 14px; font-weight: 500; color: var(--text);
+  display: flex; align-items: center; gap: 6px;
+  cursor: pointer; width: 100%;
+  min-height: 44px;  /* touch target */
+  margin-bottom: 4px;
+}
+.lh-course i { font-size: 14px; color: var(--accent); }
+
+.lh-chapter {
+  font-size: 11px; color: var(--text-sec);
+  display: flex; align-items: center; gap: 5px;
+  cursor: pointer; width: 100%;
+  min-height: 32px;
+  margin-bottom: 2px;
+}
+.lh-chapter .ch-num { color: var(--accent); }
+.lh-chapter i { font-size: 12px; color: var(--accent); }
+
+.lh-lesson {
+  font-size: 16px; font-weight: 500; color: var(--text);
+  margin-bottom: 10px;
+}
+.lh-lesson .l-num {
+  color: var(--accent); font-size: 13px; font-weight: 400;
+  margin-right: 4px;
+}
+
+.lh-progress {
+  display: flex; align-items: center; gap: 8px;
+  padding-bottom: 10px;
+}
+.lh-progress-bar {
+  flex: 1; height: 2px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+}
+.lh-progress-fill {
+  height: 100%; background: var(--accent);
+  border-radius: 2px;
+  transition: width .25s ease;
+}
+.lh-progress-label {
+  font-size: 11px; color: var(--text-ter);
+  white-space: nowrap;
+}
+
+/* Dropdown (poglavja in lekcije) */
+.lh-dropdown {
+  background: #222;
+  border: 1px solid #333;
+  border-radius: 12px;
+  margin: 0 0 8px;
+  overflow: hidden;
+}
+.lh-dropdown-item {
+  padding: 10px 14px; font-size: 13px;
+  color: var(--text-sec);
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid #2a2a2a;
+  cursor: pointer;
+  min-height: 44px;
+}
+.lh-dropdown-item:last-child { border-bottom: none; }
+.lh-dropdown-item.active { color: var(--accent); }
+.lh-dropdown-item .num {
+  font-size: 10px; color: var(--text-ter); min-width: 36px;
+}
+.lh-dropdown-item.active .num { color: var(--accent); }
+.lh-dropdown-item .check {
+  margin-left: auto; font-size: 13px; color: #3B6D11;
+}
+.lh-dropdown-item .dot {
+  margin-left: auto;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent);
+}
+```
+
+#### Behavior
+
+- Samo en dropdown odprt naenkrat — odpiranje drugega zapre prejšnjega
+- Klik izven dropdowna ga zapre (transparent backdrop `#lh-backdrop` z-index: 35)
+- Klik na item: navigira + zapre dropdown
+- Chevron ikona se obrne (`ti-chevron-down` ↔ `ti-chevron-up`) glede na stanje
+- Status ikone v dropdownu poglavij:
+  - Zaključeno poglavje (`ch.id < currentChapterId`): `ti-check` (zelena #3B6D11)
+  - Aktivno poglavje: amber pika
+  - Še neogledano: prazno
+- Status ikone v dropdownu lekcij: aktivna lekcija = amber pika
+
+#### Navigacijsko stanje (dodatki)
+
+```javascript
+let courseDropdownOpen  = false;  // dropdown za izbiro poglavja
+let chapterDropdownOpen = false;  // dropdown za izbiro lekcije
+```
+
+Oba se resetirata na `false` ob `goToCourse`, `goToChapter`, `goToLesson`.
+
+#### lesson-mode body class
+
+```css
+.lesson-mode #header { display: none; }
+.lesson-mode .main   { margin-top: 0; min-height: 100vh; }
+```
+
+Ko je `currentSectionId !== null && !quiz`, `render()` doda `.lesson-mode` na `document.body`.
+Sticky header na `top: 0` potem deluje brez konfliktov s fiksnim headerjem.
+
+#### Progress label format
+
+- `Ch. X/N` — X = index poglavja (1-based), N = skupno poglavij v kurzu
+- `Lek. Y/M` — Y = globalni indeks lekcije čez vsa poglavja (1-based), M = skupno lekcij v kurzu
+
+Primer: 3 poglavja (4+4+2 lekcij = 10). Trenutno L9 v Ch.3 → `Ch. 3/3 · Lek. 9/10`.
+
+#### Lesson name parsing
+
+`sec.title` je v formatu `"Lekcija N: Naslov lekcije"`. Za prikaz v headerju:
+```javascript
+const parts = sec.title.split(':');
+const lessonName = parts.length > 1 ? parts.slice(1).join(':').trim() : sec.title.trim();
+```
+
+#### Mobile-first checklist
+
+- [x] Touch targeti ≥ 44px za klikabilne vrstice (`.lh-course`, `.lh-dropdown-item`)
+- [x] `:active` stanje za touch (opacity .7)
+- [x] Deluje na ~380 px brez horizontalnega scrolla
+- [x] Lesson header je IZVEN `.content-wrap` (full-width sticky, content ima max-width)
+
+---
+
 ### Feature kartice (mobile)
 
 Na mobilnem **ena kartica = polna širina** (ne grid). Klik razširi detail panel inline pod kartico.

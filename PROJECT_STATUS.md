@@ -26,7 +26,7 @@ Repo: `C:\Users\andre\OneDrive\Documents\GitHub\anthropic-courses`
 |----------|------|-----------|-----------|-------------|
 | `index.html` | ✓ | ✓ | terminal piše, app bere | 2026-06-07 |
 | `CLAUDE.md` | ✓ | ✓ | ročno, oba bereta | 2026-06-05 |
-| `html-design-skill.md` | ✓ | ✓ | terminal piše, app bere | 2026-06-05 |
+| `html-design-skill.md` | ✓ | ✓ | terminal piše, app bere | 2026-06-07 |
 | `PROJECT_STATUS.md` | ✓ | ✓ | oba pišeta, oba bereta | 2026-06-07 |
 | `project-status-skill.md` | ✓ | — | app predlaga, terminal shrani | 2026-06-05 |
 | `handoff-skill.md` | ✓ | — | app predlaga, terminal shrani | 2026-06-05 |
@@ -39,6 +39,11 @@ Repo: `C:\Users\andre\OneDrive\Documents\GitHub\anthropic-courses`
 - L10: Claude for Microsoft 365 (YT: F6dzjaBCBtU) — 6 features, 8 notes, 8 questions
 - Vsebina iz PDF-jev v projektni mapi
 - Workflow: _add_ch3.py → _reinject.py → _verify.py (0 duplikatov)
+- Implementirali nov sticky lesson header (handoff: HANDOFF_2026-06-07_lesson_header.md)
+  - 4-vrstični header: kurs · poglavje · lekcija · progress bar
+  - Dva dropdowna za navigacijo (poglavja / lekcije)
+  - lesson-mode body class skrije fiksni header v lesson view
+- Posodobili html-design-skill.md — dodana sekcija "Lesson header (sticky top)"
 
 ## Next
 - [ ] Definiraj vsebino Poglavja 4 za Cowork kurs (v naslednji seji)
