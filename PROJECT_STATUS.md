@@ -24,10 +24,10 @@ Repo: `C:\Users\andre\OneDrive\Documents\GitHub\anthropic-courses`
 ## File registry
 | Datoteka | Repo | Knowledge | Kdo ureja | Zadnji sync |
 |----------|------|-----------|-----------|-------------|
-| `index.html` | ✓ | ✓ | terminal piše, app bere | 2026-06-05 |
+| `index.html` | ✓ | ✓ | terminal piše, app bere | 2026-06-07 |
 | `CLAUDE.md` | ✓ | ✓ | ročno, oba bereta | 2026-06-05 |
 | `html-design-skill.md` | ✓ | ✓ | terminal piše, app bere | 2026-06-05 |
-| `PROJECT_STATUS.md` | ✓ | ✓ | oba pišeta, oba bereta | 2026-06-05 |
+| `PROJECT_STATUS.md` | ✓ | ✓ | oba pišeta, oba bereta | 2026-06-07 |
 | `project-status-skill.md` | ✓ | — | app predlaga, terminal shrani | 2026-06-05 |
 | `handoff-skill.md` | ✓ | — | app predlaga, terminal shrani | 2026-06-05 |
 
@@ -50,7 +50,7 @@ Repo: `C:\Users\andre\OneDrive\Documents\GitHub\anthropic-courses`
 - Firebase tracking: deferred na kasnejši korak
 
 ## Diagram
-Zadnji state diagram: 2026-06-05 — ob branju ponudi prikaz.
+Zadnji state diagram: 2026-06-07 — ob branju ponudi prikaz.
 
 ## Workflow reminder
 - App (ta chat) = planiranje, vsebina, odločitve, vizualizacije
