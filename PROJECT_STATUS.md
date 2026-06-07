@@ -1,5 +1,5 @@
 # PROJECT_STATUS.md
-_Zadnja posodobitev: 2026-06-05_
+_Zadnja posodobitev: 2026-06-07_
 
 ## Projekt
 **anthropic-courses** · single HTML file (`index.html`) · mobile-first · multi-kurs
@@ -9,16 +9,17 @@ Repo: `C:\Users\andre\OneDrive\Documents\GitHub\anthropic-courses`
 | Kurz | Slug | Poglavja | Lekcije | Status |
 |------|------|----------|---------|--------|
 | Claude Code 101 | cc101 | 5 | 13 | ✓ ZAKLJUČEN |
-| Introduction to Claude Cowork | cowork | 2 | 8 | ▶ V TEKU |
+| Introduction to Claude Cowork | cowork | 3 | 10 | ▶ V TEKU |
 
 ## Cowork — podrobno stanje
 | Poglavje | Naslov | Lekcije | Status |
 |----------|--------|---------|--------|
 | 1 | Meet Claude Cowork | L1–L4 | ✓ |
 | 2 | Make Claude Cowork yours | L5–L8 | ✓ |
-| 3 | (prihodnje) | — | ○ |
+| 3 | Use Claude wherever you work | L9–L10 | ✓ |
+| 4 | (prihodnje) | — | ○ |
 
-**Naslednja lekcija:** Poglavje 3 — vsebina še ni določena, definiramo v naslednji seji.
+**Naslednja lekcija:** Poglavje 4 — vsebina še ni določena, definiramo v naslednji seji.
 
 ## File registry
 | Datoteka | Repo | Knowledge | Kdo ureja | Zadnji sync |
@@ -32,20 +33,19 @@ Repo: `C:\Users\andre\OneDrive\Documents\GitHub\anthropic-courses`
 
 > ⚠️ Če datum v knowledge ne ujema z datumom v repo — uploadaj svežo verzijo.
 
-## Zadnja seja (2026-06-05, app)
-- Posodobili CLAUDE.md v repo in knowledge (nova mobilna arhitektura)
-- Posodobili html-design-skill.md v knowledge
-- Nastavili Instructions for Claude v Settings
-- Definirali workflow: app = planiranje, terminal = izvajanje, repo = most
-- Ustvarili PROJECT_STATUS.md, project-status-skill.md, handoff-skill.md
+## Zadnja seja (2026-06-07, terminal)
+- Implementirali Cowork Ch3 "Use Claude wherever you work" (L9 + L10)
+- L9: Claude in Chrome (YT: IypXvHej9eY) — 6 features, 8 notes, 8 questions
+- L10: Claude for Microsoft 365 (YT: F6dzjaBCBtU) — 6 features, 8 notes, 8 questions
+- Vsebina iz PDF-jev v projektni mapi
+- Workflow: _add_ch3.py → _reinject.py → _verify.py (0 duplikatov)
 
 ## Next
-- [ ] Terminal: dodaj PROJECT_STATUS.md, project-status-skill.md, handoff-skill.md v repo
-- [ ] Definiraj vsebino Poglavja 3 za Cowork kurs (v app seji)
-- [ ] Terminal: implementiraj Poglavje 3, Lekcija 1
+- [ ] Definiraj vsebino Poglavja 4 za Cowork kurs (v naslednji seji)
+- [ ] Terminal: implementiraj Poglavje 4
 
 ## Odprta vprašanja
-- Cowork Poglavje 3: kateri koncepti/teme? (definiramo v app seji pred implementacijo)
+- Cowork Poglavje 4: kateri koncepti/teme? (definiramo v naslednji seji)
 - Cowork certifikat: ali ima Anthropic že certifikat za Cowork? Preveriti.
 - Firebase tracking: deferred na kasnejši korak
 
