@@ -1,5 +1,5 @@
 # PROJECT_STATUS.md
-_Zadnja posodobitev: 2026-06-08_
+_Zadnja posodobitev: 2026-06-08 (seja 2)_
 
 ## Projekt
 **anthropic-courses** · single HTML file (`index.html`) · mobile-first · multi-kurs
@@ -24,10 +24,10 @@ Repo: `C:\Users\andre\OneDrive\Documents\GitHub\anthropic-courses`
 ## File registry
 | Datoteka | Repo | Knowledge | Kdo ureja | Zadnji sync |
 |----------|------|-----------|-----------|-------------|
-| `index.html` | ✓ | ✓ | terminal piše, app bere | 2026-06-07 |
+| `index.html` | ✓ | ✓ | terminal piše, app bere | 2026-06-08 |
 | `CLAUDE.md` | ✓ | ✓ | ročno, oba bereta | 2026-06-05 |
 | `html-design-skill.md` | ✓ | ✓ | terminal piše, app bere | 2026-06-08 |
-| `PROJECT_STATUS.md` | ✓ | ✓ | oba pišeta, oba bereta | 2026-06-07 |
+| `PROJECT_STATUS.md` | ✓ | ✓ | oba pišeta, oba bereta | 2026-06-08 |
 | `project-status-skill.md` | ✓ | — | app predlaga, terminal shrani | 2026-06-05 |
 | `handoff-skill.md` | ✓ | — | app predlaga, terminal shrani | 2026-06-05 |
 
@@ -35,19 +35,18 @@ Repo: `C:\Users\andre\OneDrive\Documents\GitHub\anthropic-courses`
 
 ## Zadnja seja (2026-06-08, terminal)
 - Implementirali Cowork Ch3 "Use Claude wherever you work" (L9 + L10)
-- L9: Claude in Chrome (YT: IypXvHej9eY) — 6 features, 8 notes, 8 questions
-- L10: Claude for Microsoft 365 (YT: F6dzjaBCBtU) — 6 features, 8 notes, 8 questions
-- Vsebina iz PDF-jev v projektni mapi
-- Workflow: _add_ch3.py → _reinject.py → _verify.py (0 duplikatov)
 - Implementirali nov sticky lesson header (handoff: HANDOFF_2026-06-07_lesson_header.md)
   - 4-vrstični header: kurs · poglavje · lekcija · progress bar
   - Dva dropdowna za navigacijo (poglavja / lekcije)
-  - lesson-mode body class skrije fiksni header v lesson view
-- Posodobili html-design-skill.md — dodana sekcija "Lesson header (sticky top)"
 - Popravljeni 2 buga v lesson headerju (HANDOFF_2026-06-07_header_bugfixes.md)
-  - Bug 1: "LLekcija" double prefix → lessonNum() helper
-  - Bug 2: backdrop ostal open po dropdown navigaciji → closeDropdownsState() helper
-- Dodana "Lesson number helper" subsekcija v html-design-skill.md
+  - lessonNum() helper, closeDropdownsState() helper
+- Chapter overview kot prvorazredno mesto (handoff: HANDOFF_2026-06-08_chapter_overview.md)
+  - renderLessonHeader() deluje v obeh načinih (lesson + chapter overview)
+  - CP{N}: Chapter Overview kot tretja vrstica headerja v overview načinu
+  - goToChapterOverview() nova nav funkcija
+  - Chapter dropdown: "Chapter Overview" kot prva izbira
+  - Vsebina drawer: "Chapter Overview" entry na vrhu vsakega chapterja
+- Posodobili html-design-skill.md — sekcije: Lesson header, Lesson number helper, Chapter overview header
 
 ## Next
 - [ ] Definiraj vsebino Poglavja 4 za Cowork kurs (v naslednji seji)

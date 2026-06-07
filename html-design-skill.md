@@ -371,7 +371,20 @@ let courseDropdownOpen  = false;  // dropdown za izbiro poglavja
 let chapterDropdownOpen = false;  // dropdown za izbiro lekcije
 ```
 
-Oba se resetirata na `false` ob `goToCourse`, `goToChapter`, `goToLesson`.
+Oba se resetirata na `false` ob `goToCourse`, `goToChapter`, `goToLesson` — vendar to **ni dovolj**. Reset samo JS state-a pusti `#lh-backdrop` DOM element s class `open`, kar prekrije celotno površino in prestreza vse klike (feature kartice ne odpirajo, puščice Prej/Naprej ne delujejo).
+
+Vedno uporabi helper, ki počisti **oboje**:
+
+```javascript
+function closeDropdownsState() {
+  courseDropdownOpen  = false;
+  chapterDropdownOpen = false;
+  const bd = document.getElementById('lh-backdrop');
+  if (bd) bd.classList.remove('open');
+}
+```
+
+In v `goToCourse`, `goToChapter`, `goToLesson` kliči `closeDropdownsState()` namesto inline reseta. Brez tega koraka navigacija prek dropdowna sesuje klikabilnost cele strani.
 
 #### lesson-mode body class
 
@@ -411,6 +424,17 @@ function lessonNum(lesson) {
 ```
 
 Uporabi: `L${lessonNum(sec.lesson)}:` in `L${lessonNum(s.lesson)}` — nikoli direktno `L${sec.lesson}`.
+
+#### Chapter overview header
+
+Lesson header se uporablja **tudi** v chapter overview načinu (`currentSectionId === null`). Razlike:
+
+- Tretja vrstica: `CP{chapterIdx}: Chapter Overview` namesto `L{N}: <naslov>`
+- Progress label: `Ch. X/N` brez `Lek. Y/M`
+- Chapter dropdown prikaže "Chapter Overview" kot prvo izbiro nad lekcijami (aktivno ko `currentSectionId === null`)
+- Vsebina drawer ima "Chapter Overview" entry na vrhu sekcije vsakega chapterja
+
+Navigacijska funkcija `goToChapterOverview(chId)` postavi `currentSectionId = null` in renderira chapter overview view. `render()` pogoj za `lesson-mode`: `!quiz && !!currentChapterId` (velja v obeh pogledih).
 
 #### Mobile-first checklist
 

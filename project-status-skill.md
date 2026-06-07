@@ -74,10 +74,15 @@ Posodobi PROJECT_STATUS.md:
 ### Terminal (Claude Code) — po implementaciji:
 ```
 Posodobi PROJECT_STATUS.md:
+- Zadnja posodobitev: [današnji datum] (na vrhu)
 - Zadnja seja: [datum, terminal] — [kaj je bilo implementirano]
 - Cowork stanje: [posodobi tabelo če je nova lekcija]
 - Next: [posodobi če je naloga opravljena]
+- File registry: posodobi "Zadnji sync" datum ZA VSAKO datoteko, ki si jo v tej seji spremenil
+  (vključno s `PROJECT_STATUS.md` samo — če pišeš v ta file, posodobi tudi njen sync datum)
 ```
+
+**Pomembno:** Datum na vrhu (`_Zadnja posodobitev:_`), datum "Zadnja seja" in vsi "Zadnji sync" datumi v File registry za spremenjene datoteke se MORAJO ujemati. Nekonzistentni datumi pomenijo, da bo naslednja seja začela z napačnimi predpostavkami o tem, katera verzija je svež.
 
 ## Diagram protocol
 - Prvič: Claude oceni kdaj je projekt zrel in **predlaga** diagram

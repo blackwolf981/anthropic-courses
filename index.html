@@ -905,6 +905,17 @@ function goToChapter(id) {
   render();
 }
 
+function goToChapterOverview(chId) {
+  currentChapterId  = chId;
+  currentSectionId  = null;
+  selectedFeatureId = null;
+  quiz              = null;
+  closeDropdownsState();
+  closeDrawer();
+  render();
+  window.scrollTo(0, 0);
+}
+
 function goToLesson(chId, secId) {
   currentChapterId  = chId;
   currentSectionId  = secId;
@@ -997,6 +1008,15 @@ function renderDrawer() {
   let html = '';
   for (const ch of course.chapters) {
     const isActiveCh = ch.id === currentChapterId;
+    const chapterIdx = course.chapters.findIndex(c => c.id === ch.id) + 1;
+    const isActiveOverview = isActiveCh && currentSectionId === null;
+    const overviewBtn = `<button class="drawer-sec-btn${isActiveOverview ? ' active' : ''}"
+      onclick="goToChapterOverview(${ch.id})">
+      <span class="drawer-sec-dot"></span>
+      <span class="drawer-sec-lesson">CP${chapterIdx}</span>
+      <span class="drawer-sec-title">Chapter Overview</span>
+    </button>`;
+
     const secsHtml = ch.sections.map(s => {
       const isActiveSec = isActiveCh && s.id === currentSectionId;
       const titleParts = s.title.split(':');
@@ -1017,6 +1037,7 @@ function renderDrawer() {
         <span class="drawer-ch-arrow"><i class="ti ti-chevron-${isActiveCh ? 'up' : 'down'}"></i></span>
       </button>
       <div class="drawer-sections${isActiveCh ? ' open' : ''}" id="dsecs-${ch.id}">
+        ${overviewBtn}
         ${secsHtml}
       </div>
     </div>`;
@@ -1129,10 +1150,6 @@ function renderChapterOverview(ch) {
     </div>` : '';
 
   return `<div class="content-wrap">
-    <div class="ch-overview-header">
-      <div class="ch-label">Poglavje ${ch.id}</div>
-      <div class="ch-title">${ch.title}</div>
-    </div>
     ${objHtml.length ? `<div class="ch-objectives">
       <div class="ch-obj-label">Cilji poglavja</div>
       ${objHtml}
@@ -1146,23 +1163,11 @@ function renderChapterOverview(ch) {
 function renderLessonHeader() {
   const course = getCourse();
   const ch = getChapter();
-  const sec = getSection();
+  const sec = getSection();  // null v chapter overview načinu
+  if (!ch) return '';
 
-  // Progress
   const totalChapters = course.chapters.length;
   const chapterIdx = course.chapters.findIndex(c => c.id === currentChapterId) + 1;
-  let totalSections = 0, globalIdx = 0;
-  for (const c of course.chapters) {
-    for (const s of c.sections) {
-      totalSections++;
-      if (c.id === currentChapterId && s.id === currentSectionId) globalIdx = totalSections;
-    }
-  }
-  const progressPct = totalSections ? Math.round(globalIdx / totalSections * 100) : 0;
-
-  // Lesson name
-  const parts = sec.title.split(':');
-  const lessonName = parts.length > 1 ? parts.slice(1).join(':').trim() : sec.title.trim();
 
   // Course dropdown
   const courseChevron = courseDropdownOpen ? 'ti-chevron-up' : 'ti-chevron-down';
@@ -1181,10 +1186,15 @@ function renderLessonHeader() {
     }).join('')
   }</div>` : '';
 
-  // Chapter dropdown
+  // Chapter dropdown — Chapter Overview kot prva izbira
   const chChevron = chapterDropdownOpen ? 'ti-chevron-up' : 'ti-chevron-down';
-  const chDropHtml = chapterDropdownOpen ? `<div class="lh-dropdown">${
-    ch.sections.map(s => {
+  const chDropHtml = chapterDropdownOpen ? `<div class="lh-dropdown">
+    <div class="lh-dropdown-item${!currentSectionId ? ' active' : ''}" onclick="goToChapterOverview(${ch.id})">
+      <span class="num">CP${chapterIdx}</span>
+      <span class="lh-item-title">Chapter Overview</span>
+      ${!currentSectionId ? '<span class="dot"></span>' : ''}
+    </div>
+    ${ch.sections.map(s => {
       const isActive = s.id === currentSectionId;
       const sParts = s.title.split(':');
       const sName = sParts.length > 1 ? sParts.slice(1).join(':').trim() : s.title.trim();
@@ -1193,8 +1203,35 @@ function renderLessonHeader() {
         <span class="lh-item-title">${sName}</span>
         ${isActive ? '<span class="dot"></span>' : ''}
       </div>`;
-    }).join('')
-  }</div>` : '';
+    }).join('')}
+  </div>` : '';
+
+  // Title row in progress — lesson ali chapter overview
+  let titleRowHtml, progressHtml;
+  if (sec) {
+    const parts = sec.title.split(':');
+    const lessonName = parts.length > 1 ? parts.slice(1).join(':').trim() : sec.title.trim();
+    let totalSections = 0, globalIdx = 0;
+    for (const c of course.chapters) {
+      for (const s of c.sections) {
+        totalSections++;
+        if (c.id === currentChapterId && s.id === currentSectionId) globalIdx = totalSections;
+      }
+    }
+    const progressPct = totalSections ? Math.round(globalIdx / totalSections * 100) : 0;
+    titleRowHtml = `<div class="lh-lesson"><span class="l-num">L${lessonNum(sec.lesson)}:</span>${lessonName}</div>`;
+    progressHtml = `<div class="lh-progress">
+      <div class="lh-progress-bar"><div class="lh-progress-fill" style="width:${progressPct}%"></div></div>
+      <span class="lh-progress-label">Ch. ${chapterIdx}/${totalChapters} &middot; Lek. ${globalIdx}/${totalSections}</span>
+    </div>`;
+  } else {
+    const progressPct = Math.round(chapterIdx / totalChapters * 100);
+    titleRowHtml = `<div class="lh-lesson"><span class="l-num">CP${chapterIdx}:</span>Chapter Overview</div>`;
+    progressHtml = `<div class="lh-progress">
+      <div class="lh-progress-bar"><div class="lh-progress-fill" style="width:${progressPct}%"></div></div>
+      <span class="lh-progress-label">Ch. ${chapterIdx}/${totalChapters}</span>
+    </div>`;
+  }
 
   return `<div class="lesson-header">
     <div class="lh-course" onclick="toggleCourseDropdown()">
@@ -1207,15 +1244,8 @@ function renderLessonHeader() {
       <i class="ti ${chChevron}"></i>
     </div>
     ${chDropHtml}
-    <div class="lh-lesson">
-      <span class="l-num">L${lessonNum(sec.lesson)}:</span>${lessonName}
-    </div>
-    <div class="lh-progress">
-      <div class="lh-progress-bar">
-        <div class="lh-progress-fill" style="width:${progressPct}%"></div>
-      </div>
-      <span class="lh-progress-label">Ch. ${chapterIdx}/${totalChapters} &middot; Lek. ${globalIdx}/${totalSections}</span>
-    </div>
+    ${titleRowHtml}
+    ${progressHtml}
   </div>`;
 }
 
@@ -1407,9 +1437,9 @@ function quizEngineHTML() {
 
 /* ── Master render ──────────────────────────────────────────────── */
 function render() {
-  const inLesson = !!(currentSectionId && !quiz);
-  document.body.classList.toggle('lesson-mode', inLesson);
-  if (!inLesson) renderHeader();
+  const showLessonHeader = !quiz && !!currentChapterId;
+  document.body.classList.toggle('lesson-mode', showLessonHeader);
+  if (!showLessonHeader) renderHeader();
 
   let html = '';
   if (quiz) {
@@ -1424,7 +1454,7 @@ function render() {
     document.getElementById('bn-kurzi').classList.remove('active');
   } else {
     const ch = getChapter();
-    html = renderChapterOverview(ch);
+    html = renderLessonHeader() + renderChapterOverview(ch);
     document.getElementById('bn-vsebina').classList.add('active');
     document.getElementById('bn-kviz').classList.remove('active');
     document.getElementById('bn-kurzi').classList.remove('active');
