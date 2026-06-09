@@ -9,7 +9,7 @@ Repo: `C:\Users\andre\OneDrive\Documents\GitHub\anthropic-courses`
 | Kurz | Slug | Poglavja | Lekcije | Status |
 |------|------|----------|---------|--------|
 | Claude Code 101 | cc101 | 5 | 13 | ✓ ZAKLJUČEN |
-| Introduction to Claude Cowork | cowork | 4 | 14 | ✓ ZAKLJUČEN |
+| Introduction to Claude Cowork | cowork | 5 | 15 | ✓ ZAKLJUČEN |
 
 ## Cowork — podrobno stanje
 | Poglavje | Naslov | Lekcije | Status |
@@ -18,6 +18,7 @@ Repo: `C:\Users\andre\OneDrive\Documents\GitHub\anthropic-courses`
 | 2 | Make Claude Cowork yours | L5–L8 | ✓ |
 | 3 | Use Claude wherever you work | L9–L10 | ✓ |
 | 4 | Deli in varuj | L11–L14 | ✓ |
+| 5 | Certifikat Prep | L15 | ✓ |
 
 ## File registry
 | Datoteka | Repo | Knowledge | Kdo ureja | Zadnji sync |
@@ -32,7 +33,8 @@ Repo: `C:\Users\andre\OneDrive\Documents\GitHub\anthropic-courses`
 > ⚠️ Če datum v knowledge ne ujema z datumom v repo — uploadaj svežo verzijo.
 
 ## Zadnja seja (2026-06-09, terminal)
-- Implementirali Cowork Ch4 "Deli in varuj" (L11–L14) — **kurz je zaključen**
+- Implementirali Cowork Ch5 "Certifikat Prep" (L15) — 10 feat, 4 notes, 12 q, 3 refleksije (Q|A format)
+- Implementirali Cowork Ch4 "Deli in varuj" (L11–L14)
   - L11: Varno delo z avtonomijo (3 feat, 9 notes, 7 q)
   - L12: Preden deliš — preveri skill (3 feat, 7 notes, 7 q)
   - L13: Deli z ekipo (3 feat, 7 notes, 7 q)
