@@ -1,5 +1,5 @@
 # PROJECT_STATUS.md
-_Zadnja posodobitev: 2026-06-08 (seja 2)_
+_Zadnja posodobitev: 2026-06-09 (seja 3)_
 
 ## Projekt
 **anthropic-courses** · single HTML file (`index.html`) · mobile-first · multi-kurs
@@ -9,7 +9,7 @@ Repo: `C:\Users\andre\OneDrive\Documents\GitHub\anthropic-courses`
 | Kurz | Slug | Poglavja | Lekcije | Status |
 |------|------|----------|---------|--------|
 | Claude Code 101 | cc101 | 5 | 13 | ✓ ZAKLJUČEN |
-| Introduction to Claude Cowork | cowork | 3 | 10 | ▶ V TEKU |
+| Introduction to Claude Cowork | cowork | 4 | 14 | ✓ ZAKLJUČEN |
 
 ## Cowork — podrobno stanje
 | Poglavje | Naslov | Lekcije | Status |
@@ -17,43 +17,41 @@ Repo: `C:\Users\andre\OneDrive\Documents\GitHub\anthropic-courses`
 | 1 | Meet Claude Cowork | L1–L4 | ✓ |
 | 2 | Make Claude Cowork yours | L5–L8 | ✓ |
 | 3 | Use Claude wherever you work | L9–L10 | ✓ |
-| 4 | (prihodnje) | — | ○ |
-
-**Naslednja lekcija:** Poglavje 4 — vsebina še ni določena, definiramo v naslednji seji.
+| 4 | Deli in varuj | L11–L14 | ✓ |
 
 ## File registry
 | Datoteka | Repo | Knowledge | Kdo ureja | Zadnji sync |
 |----------|------|-----------|-----------|-------------|
-| `index.html` | ✓ | ✓ | terminal piše, app bere | 2026-06-08 |
+| `index.html` | ✓ | ✓ | terminal piše, app bere | 2026-06-09 |
 | `CLAUDE.md` | ✓ | ✓ | ročno, oba bereta | 2026-06-05 |
 | `html-design-skill.md` | ✓ | ✓ | terminal piše, app bere | 2026-06-08 |
-| `PROJECT_STATUS.md` | ✓ | ✓ | oba pišeta, oba bereta | 2026-06-08 |
+| `PROJECT_STATUS.md` | ✓ | ✓ | oba pišeta, oba bereta | 2026-06-09 |
 | `project-status-skill.md` | ✓ | — | app predlaga, terminal shrani | 2026-06-05 |
 | `handoff-skill.md` | ✓ | — | app predlaga, terminal shrani | 2026-06-05 |
 
 > ⚠️ Če datum v knowledge ne ujema z datumom v repo — uploadaj svežo verzijo.
 
+## Zadnja seja (2026-06-09, terminal)
+- Implementirali Cowork Ch4 "Deli in varuj" (L11–L14) — **kurz je zaključen**
+  - L11: Varno delo z avtonomijo (3 feat, 9 notes, 7 q)
+  - L12: Preden deliš — preveri skill (3 feat, 7 notes, 7 q)
+  - L13: Deli z ekipo (3 feat, 7 notes, 7 q)
+  - L14: Povzetek in naslednji koraki (5 feat, 7 notes, 5 q)
+  - Skupaj Ch4: 14 features, 30 notes, 26 questions
+- _add_ch4.py + _reinject.py + _verify.py → brez duplikatov, vse zeleno
+- Cowork skupaj: 4 poglavja, 14 lekcij, 71 features, 109 notes, 106 vprašanj
+
 ## Zadnja seja (2026-06-08, terminal)
 - Implementirali Cowork Ch3 "Use Claude wherever you work" (L9 + L10)
-- Implementirali nov sticky lesson header (handoff: HANDOFF_2026-06-07_lesson_header.md)
-  - 4-vrstični header: kurs · poglavje · lekcija · progress bar
-  - Dva dropdowna za navigacijo (poglavja / lekcije)
-- Popravljeni 2 buga v lesson headerju (HANDOFF_2026-06-07_header_bugfixes.md)
-  - lessonNum() helper, closeDropdownsState() helper
-- Chapter overview kot prvorazredno mesto (handoff: HANDOFF_2026-06-08_chapter_overview.md)
-  - renderLessonHeader() deluje v obeh načinih (lesson + chapter overview)
-  - CP{N}: Chapter Overview kot tretja vrstica headerja v overview načinu
-  - goToChapterOverview() nova nav funkcija
-  - Chapter dropdown: "Chapter Overview" kot prva izbira
-  - Vsebina drawer: "Chapter Overview" entry na vrhu vsakega chapterja
-- Posodobili html-design-skill.md — sekcije: Lesson header, Lesson number helper, Chapter overview header
+- Implementirali nov sticky lesson header + chapter overview
+- Posodobili html-design-skill.md
 
 ## Next
-- [ ] Definiraj vsebino Poglavja 4 za Cowork kurs (v naslednji seji)
-- [ ] Terminal: implementiraj Poglavje 4
+- [ ] Cowork certifikat: preveriti ali Anthropic ponuja certifikat
+- [ ] Firebase tracking / napredek (deferred)
+- [ ] Razmisliti o naslednjem kurzu
 
 ## Odprta vprašanja
-- Cowork Poglavje 4: kateri koncepti/teme? (definiramo v naslednji seji)
 - Cowork certifikat: ali ima Anthropic že certifikat za Cowork? Preveriti.
 - Firebase tracking: deferred na kasnejši korak
 
