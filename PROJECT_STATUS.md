@@ -1,5 +1,5 @@
 # PROJECT_STATUS.md
-_Zadnja posodobitev: 2026-06-09 (seja 3)_
+_Zadnja posodobitev: 2026-06-09_
 
 ## Projekt
 **anthropic-courses** · single HTML file (`index.html`) · mobile-first · multi-kurs
@@ -20,6 +20,8 @@ Repo: `C:\Users\andre\OneDrive\Documents\GitHub\anthropic-courses`
 | 4 | Deli in varuj | L11–L14 | ✓ |
 | 5 | Certifikat Prep | L15 | ✓ |
 
+**Cowork skupaj:** 5 poglavij · 15 lekcij · 81 features · 113 notes · 118 vprašanj
+
 ## File registry
 | Datoteka | Repo | Knowledge | Kdo ureja | Zadnji sync |
 |----------|------|-----------|-----------|-------------|
@@ -33,35 +35,26 @@ Repo: `C:\Users\andre\OneDrive\Documents\GitHub\anthropic-courses`
 > ⚠️ Če datum v knowledge ne ujema z datumom v repo — uploadaj svežo verzijo.
 
 ## Zadnja seja (2026-06-09, terminal)
-- Implementirali Cowork Ch5 "Certifikat Prep" (L15) — 10 feat, 4 notes, 12 q, 3 refleksije (Q|A format)
-- Implementirali Cowork Ch4 "Deli in varuj" (L11–L14)
-  - L11: Varno delo z avtonomijo (3 feat, 9 notes, 7 q)
-  - L12: Preden deliš — preveri skill (3 feat, 7 notes, 7 q)
-  - L13: Deli z ekipo (3 feat, 7 notes, 7 q)
-  - L14: Povzetek in naslednji koraki (5 feat, 7 notes, 5 q)
-  - Skupaj Ch4: 14 features, 30 notes, 26 questions
-- _add_ch4.py + _reinject.py + _verify.py → brez duplikatov, vse zeleno
-- Cowork skupaj: 4 poglavja, 14 lekcij, 71 features, 109 notes, 106 vprašanj
-
-## Zadnja seja (2026-06-08, terminal)
-- Implementirali Cowork Ch3 "Use Claude wherever you work" (L9 + L10)
-- Implementirali nov sticky lesson header + chapter overview
-- Posodobili html-design-skill.md
+- Implementirali Cowork Ch4 "Deli in varuj" (L11–L14) — _add_ch4.py
+- Implementirali Cowork Ch5 "Certifikat Prep" (L15) — _add_ch5_cowork.py
+  - 10 ref kartic · 4 notes · 12 scenario vprašanj · 3 refleksije (Q|A format)
+- Cowork skupaj: 5 poglavij, 15 lekcij, 81 features, 113 notes, 118 vprašanj
+- _reinject.py + _verify.py → brez duplikatov, vse zeleno (index.html 340 KB)
 
 ## Next
-- [ ] Cowork certifikat: preveriti ali Anthropic ponuja certifikat
+- [ ] Preveriti ali Anthropic ponuja certifikat za Cowork
 - [ ] Firebase tracking / napredek (deferred)
-- [ ] Razmisliti o naslednjem kurzu
+- [ ] Odločiti kateri kurz je naslednji
 
 ## Odprta vprašanja
-- Cowork certifikat: ali ima Anthropic že certifikat za Cowork? Preveriti.
+- Cowork certifikat: ali Anthropic ponuja uradni certifikat?
 - Firebase tracking: deferred na kasnejši korak
 
 ## Diagram
 Zadnji state diagram: 2026-06-07 — ob branju ponudi prikaz.
 
 ## Workflow reminder
-- App (ta chat) = planiranje, vsebina, odločitve, vizualizacije
-- Terminal (Claude Code) = izvajanje, kodiranje, deployment
+- App = planiranje, vsebina, odločitve
+- Terminal = izvajanje, kodiranje, deployment
 - Ob začetku seje: uploadaj svež `index.html` + `PROJECT_STATUS.md`
-- Ob koncu seje: posodobi `PROJECT_STATUS.md` (datum, zadnja seja, next)
+- Ob koncu seje: posodobi `PROJECT_STATUS.md`
